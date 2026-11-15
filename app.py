@@ -75,11 +75,37 @@ def sync_progress():
         if len(supplied) > 48:
             return jsonify({"error": "Too many progress sections."}), 400
         allowed = {
-            "ithaca-quests", "ithaca-assessments-v1",
+            "ithaca-quests", "ithaca-assessments-v1", "ithaca-exam-practice-v1",
             "ithaca-athena-current-v1", "ithaca-athena-xp-v1",
         }
         state = {key: value for key, value in supplied.items()
                  if key in allowed or (key.startswith("ithaca-preparation:") and len(key) <= 220)}
+        # ITHACA_UPGRADE6: only bounded, aggregated, non-sensitive exam attempt data.
+        if "ithaca-exam-practice-v1" in state:
+            attempts = state["ithaca-exam-practice-v1"]
+            if not isinstance(attempts, list) or len(attempts) > 40:
+                return jsonify({"error": "Invalid exam history."}), 400
+            sanitized = []
+            for item in attempts:
+                if not isinstance(item, dict):
+                    return jsonify({"error": "Invalid exam entry."}), 400
+                exam, date = item.get('exam'), item.get('date')
+                score, total, topics = item.get('score'), item.get('total'), item.get('topics')
+                if (exam not in {'SAT','ACT','TOEFL','IELTS','DET'} or not isinstance(date, str) or len(date) > 40
+                        or type(score) is not int or type(total) is not int or not 1 <= total <= 8
+                        or not 0 <= score <= total or not isinstance(topics, dict) or len(topics) > 8):
+                    return jsonify({"error": "Invalid exam attempt format."}), 400
+                clean_topics = {}
+                for topic, result in topics.items():
+                    if not isinstance(topic, str) or len(topic) > 70 or not isinstance(result, dict):
+                        return jsonify({"error": "Invalid exam topic."}), 400
+                    correct, count = result.get('correct'), result.get('total')
+                    if type(correct) is not int or type(count) is not int or not 1 <= count <= 8 or not 0 <= correct <= count:
+                        return jsonify({"error": "Invalid exam topic score."}), 400
+                    clean_topics[topic] = {"correct": correct, "total": count}
+                sanitized.append({"date": date, "exam": exam, "score": score,
+                                  "total": total, "topics": clean_topics})
+            state["ithaca-exam-practice-v1"] = sanitized
         collection.update_one(
             {"_id": owner_id},
             {"$set": {"state": state, "updated_at": datetime.now(timezone.utc)}},
@@ -280,11 +306,33 @@ def athena_plan():
                             topics[TOPICS[slug]["title"]] = f"{good}/{count} correct"
             assessment = {"form": form, "score": f"{score} of 8", "topic_results": topics}
 
+    # ITHACA_UPGRADE6: consent-gated, bounded exam topic summaries for Athena.
+    exam_practice = []
+    raw_exams = data.get("exam_practice", [])
+    if raw_exams is not None:
+        if not isinstance(raw_exams, list) or len(raw_exams) > 5:
+            return jsonify({"error": "Invalid exam practice history."}), 400
+        for item in raw_exams:
+            if not isinstance(item, dict) or item.get("exam") not in {"SAT", "ACT", "TOEFL", "IELTS", "DET"}:
+                return jsonify({"error": "Invalid practice category."}), 400
+            score, total, raw_topics = item.get("score"), item.get("total"), item.get("topics")
+            if (type(score) is not int or type(total) is not int or not 1 <= total <= 8
+                    or not 0 <= score <= total or not isinstance(raw_topics, dict) or len(raw_topics) > 8):
+                return jsonify({"error": "Invalid practice result."}), 400
+            topics = {}
+            for name, result in raw_topics.items():
+                if not isinstance(name, str) or len(name) > 70 or not isinstance(result, dict):
+                    return jsonify({"error": "Invalid practice topic."}), 400
+                correct, count = result.get("correct"), result.get("total")
+                if type(correct) is not int or type(count) is not int or not 1 <= count <= 8 or not 0 <= correct <= count:
+                    return jsonify({"error": "Invalid topic score."}), 400
+                topics[name] = {"correct": correct, "total": count}
+            exam_practice.append({"exam": item["exam"], "score": score, "total": total, "topics": topics})
     if not os.getenv("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") == "PASTE_YOUR_API_KEY_HERE":
         return jsonify({"error": "Gemini is not configured. Add GEMINI_API_KEY to your .env file, then restart Flask."}), 503
     try:
         from athena import generate_plan
-        plan = generate_plan(profile, assessment, scenario)
+        plan = generate_plan(profile, assessment, scenario, exam_practice=exam_practice)
     except ValueError as error:
         return jsonify({"error": str(error)}), 502
     except Exception as error:

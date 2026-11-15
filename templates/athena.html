@@ -44,7 +44,7 @@
         </label>
         <label class="athena-consent">
           <input type="checkbox" id="consent">
-          <span>Use my grade, study goals, selected universities, and latest practice topic scores to make a plan with Gemini. Please use fictional or non-sensitive student information while testing.</span>
+          <span>Use my grade, study goals, selected universities, latest General Skills scores, and recent exam-category topic scores to make a plan with Gemini. Please use fictional or non-sensitive student information while testing.</span>
         </label>
         <button type="button" class="primary athena-generate" id="generate">Build my journey ↗</button>
         <p id="athena-error" class="form-error" role="alert" hidden></p>
@@ -84,6 +84,13 @@
     const profileSignature = JSON.stringify([profile.grade, profile.interest, profile.study_hours, profile.universities || [], profile.entry_year]);
     const planKey = 'ithaca-athena-current-v1';
     const historyKey = 'ithaca-assessments-v1';
+    // ITHACA_UPGRADE6: existing exam-category attempts; no raw answers or personal details.
+    let recentExam = [];
+    try {
+      const savedExam = JSON.parse(localStorage.getItem('ithaca-exam-practice-v1') || '[]');
+      if (Array.isArray(savedExam)) recentExam = savedExam.filter(x => x &&
+        ['SAT','ACT','TOEFL','IELTS','DET'].includes(x.exam) && x.topics).slice(-5);
+    } catch (_) { recentExam = []; }
     const generateButton = document.getElementById('generate');
     const errorNode = document.getElementById('athena-error');
     let latest = null;
@@ -142,13 +149,17 @@
         return;
       }
       const scenario = document.getElementById('scenario').value;
+      try {
+        const h = JSON.parse(localStorage.getItem('ithaca-exam-practice-v1') || '[]');
+        recentExam = Array.isArray(h) ? h.filter(x => x && ['SAT','ACT','TOEFL','IELTS','DET'].includes(x.exam) && x.topics).slice(-5) : [];
+      } catch (_) { recentExam = []; }
       generateButton.disabled = true;
       generateButton.textContent = scenario === 'steady' ? 'Planning your journey…' : 'Finding a new route…';
       try {
         const response = await fetch({{ url_for('athena_plan')|tojson }}, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({consent: true, scenario, assessment: latest ? {
+          body: JSON.stringify({consent: true, scenario, exam_practice: recentExam.map(x => ({exam:x.exam,score:x.score,total:x.total,topics:x.topics})), assessment: latest ? {
             form: latest.form, score: latest.score, total: latest.total, topics: latest.topics
           } : null})
         });

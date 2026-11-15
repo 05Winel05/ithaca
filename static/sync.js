@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const commonKeys = [
-    'ithaca-quests', 'ithaca-assessments-v1',
+    'ithaca-quests', 'ithaca-assessments-v1', 'ithaca-exam-practice-v1',
     'ithaca-athena-current-v1', 'ithaca-athena-xp-v1'
   ];
   let connected = false;
@@ -48,6 +48,17 @@
           map.set(id, entry);
         }
         all[key] = [...map.values()].sort((x, y) => x.date.localeCompare(y.date)).slice(-30);
+      } else if (key === 'ithaca-exam-practice-v1') {
+        // Merge existing browser results with MongoDB results, retaining original timestamps.
+        const entries = [...(Array.isArray(b) ? b : []), ...(Array.isArray(a) ? a : [])];
+        const unique = new Map();
+        for (const attempt of entries) {
+          if (!attempt || typeof attempt.date !== 'string' || typeof attempt.exam !== 'string') continue;
+          if (!['SAT','ACT','TOEFL','IELTS','DET'].includes(attempt.exam)) continue;
+          const identity = [attempt.date, attempt.exam, attempt.score, attempt.total].join('|');
+          unique.set(identity, attempt);
+        }
+        all[key] = [...unique.values()].sort((x,y) => x.date.localeCompare(y.date)).slice(-40);
       } else if (key === 'ithaca-athena-xp-v1') {
         const ledger = {};
         for (const day of new Set([...Object.keys(a || {}), ...Object.keys(b || {})])) {

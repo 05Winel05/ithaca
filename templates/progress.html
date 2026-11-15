@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Academic progress — Ithaca</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='unified_progress.css') }}">
 </head>
 <body>
   <header class="topbar wrap">
@@ -36,6 +37,28 @@
         <div class="study-tip" id="study-tip">Start with a short practice check. Your answers will help you choose a useful next step.</div>
       </section>
     </div>
+    <!-- ITHACA_UPGRADE6: General Skills + SAT/ACT/TOEFL/IELTS/DET history -->
+    <section class="unified-progress" aria-label="All practice results">
+      <div class="unified-progress-header">
+        <div><span class="panel-index">03 / YOUR COMPLETE PRACTICE HISTORY</span>
+        <h2>All exam practice in one place</h2>
+        <p class="hint">Original Ithaca practice questions; not official or predictive exam scores.</p></div>
+        <a class="secondary-btn" href="{{ url_for('exam_practice.index') }}">Explore exams ↗</a>
+      </div>
+      <div class="unified-stats">
+        <div class="panel unified-stat"><span class="card-label">ALL ATTEMPTS</span><strong id="unified-attempt-count">0</strong></div>
+        <div class="panel unified-stat"><span class="card-label">CATEGORIES PRACTICED</span><strong id="unified-category-count">0</strong></div>
+        <div class="panel unified-stat"><span class="card-label">LATEST PRACTICE</span><strong id="unified-latest-score">—</strong></div>
+      </div>
+      <div class="unified-columns">
+        <div class="panel unified-panel"><h2>Recent results</h2><div id="unified-exam-history"></div></div>
+        <div class="panel unified-panel"><h2>Exam topics to review</h2>
+          <p class="hint">Recent exam-category questions only, ranked from lowest accuracy.</p>
+          <div id="unified-topic-breakdown"></div>
+          <p><a class="secondary-btn" id="unified-focus-link" href="{{ url_for('exam_practice.index') }}">Practice exam categories ↗</a></p>
+        </div>
+      </div>
+    </section>
     <div class="progress-actions">
       <a class="primary wide-action" id="practice-next" href="{{ url_for('assessment', form='A') }}">Start practice set A ↗</a>
       <a class="secondary-btn back-action" href="{{ url_for('journey') }}">Back to the voyage map</a>
@@ -44,6 +67,7 @@
   </main>
   <footer class="wrap foot">LEARN · PRACTICE · REFLECT · IMPROVE <span>ITHACA / 2026</span></footer>
   <script src="{{ url_for('static', filename='sync.js') }}"></script>
+  <script src="{{ url_for('static', filename='unified_progress.js') }}" defer></script>
   <script>
     window.IthacaSync.ready.then(() => {
     const historyKey = 'ithaca-assessments-v1';

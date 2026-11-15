@@ -61,7 +61,7 @@ def _check_plan(data):
     }
 
 
-def generate_plan(profile, assessment, scenario):
+def generate_plan(profile, assessment, scenario, exam_practice=None):
     model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
     context = {
         "student": {
@@ -73,6 +73,7 @@ def generate_plan(profile, assessment, scenario):
             "scholarship_priority": bool(profile.get("scholarships")),
         },
         "latest_original_practice_check": assessment,
+        "recent_original_exam_category_practice": (exam_practice or [])[-5:],
         "verified_university_planning_context": build_athena_context(profile, assessment),
         "situation": scenario,
     }
@@ -96,6 +97,13 @@ Do not assume admission policies have not changed since the review date.
 Prioritize the student's lowest recent practice topics when available, but do not treat
 an eight-question practice as a validated diagnostic or standardized exam.
 Do not call external websites. The app must make only one Gemini request for this plan.
+Also use recent_original_exam_category_practice if provided. It contains up to five
+short original Ithaca exam-category exercises, NOT official SAT, ACT, TOEFL, IELTS,
+or Duolingo English Test results. Recommend specific topic practice based on the
+lowest recent topic scores, but explicitly acknowledge the small sample size.
+Never claim that an Ithaca practice score is a standardized test score.
+Do not repeat student-identifying details. If both old and new results exist,
+consider both. Continue to make just one Gemini request per requested plan.
 Important boundaries: Never invent admissions requirements, exact deadlines,
 test score thresholds, scholarship eligibility, financial aid facts or admission probabilities.
 You have NO access to live university websites; tell the student to check the official links
