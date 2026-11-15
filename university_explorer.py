@@ -1,15 +1,35 @@
-"""Ithaca University Explorer: curated official links, not admissions policy claims."""
+"""Ithaca University Explorer: curated official admissions starting points.
+
+Only universities in university_data.UNIVERSITIES have reviewed Ithaca summaries.
+All other schools are official-link-only: never infer their requirements.
+"""
+
 from flask import Blueprint, render_template
 from university_data import UNIVERSITIES
 
 explorer_bp = Blueprint('explorer', __name__)
 
+# id, official name, city, state, official first-year/undergraduate admissions page
 EXTRA = [
     ('harvard', 'Harvard University', 'Cambridge', 'Massachusetts', 'https://college.harvard.edu/admissions/apply/first-year-applicants'),
     ('yale', 'Yale University', 'New Haven', 'Connecticut', 'https://admissions.yale.edu/apply'),
     ('gatech', 'Georgia Institute of Technology', 'Atlanta', 'Georgia', 'https://admission.gatech.edu/first-year/deadlines'),
     ('berkeley', 'University of California, Berkeley', 'Berkeley', 'California', 'https://www.admissions.berkeley.edu/'),
+    ('utaustin', 'University of Texas at Austin', 'Austin', 'Texas', 'https://admissions.utexas.edu/apply/freshman/'),
+    ('tamu', 'Texas A&M University', 'College Station', 'Texas', 'https://admissions.tamu.edu/apply/freshman/index.html'),
+    ('utdallas', 'University of Texas at Dallas', 'Richardson', 'Texas', 'https://enroll.utdallas.edu/freshman/'),
+    ('utarlington', 'University of Texas at Arlington', 'Arlington', 'Texas', 'https://www.uta.edu/admissions/apply/freshmen'),
+    ('houston', 'University of Houston', 'Houston', 'Texas', 'https://www.uh.edu/undergraduate-admissions/'),
+    ('baylor', 'Baylor University', 'Waco', 'Texas', 'https://admissions.web.baylor.edu/'),
+    ('smu', 'Southern Methodist University', 'Dallas', 'Texas', 'https://www.smu.edu/admission'),
+    ('texastech', 'Texas Tech University', 'Lubbock', 'Texas', 'https://www.depts.ttu.edu/admissions/'),
+    ('unt', 'University of North Texas', 'Denton', 'Texas', 'https://admissions.unt.edu/'),
+    ('txstate', 'Texas State University', 'San Marcos', 'Texas', 'https://www.admissions.txst.edu/'),
+    ('princeton', 'Princeton University', 'Princeton', 'New Jersey', 'https://admission.princeton.edu/'),
+    ('duke', 'Duke University', 'Durham', 'North Carolina', 'https://admissions.duke.edu/'),
+    ('purdue', 'Purdue University', 'West Lafayette', 'Indiana', 'https://admissions.purdue.edu/'),
 ]
+
 
 @explorer_bp.get('/explore')
 def explore():
