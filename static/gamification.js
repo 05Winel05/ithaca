@@ -122,7 +122,8 @@
     list.hidden=false;
     if($('athena-dash-title')) $('athena-dash-title').textContent=saved.plan.heading||'Your Athena plan';
     if($('athena-dash-caption')) $('athena-dash-caption').textContent=saved.plan.summary||'';
-    if($('athena-dash-foot')) $('athena-dash-foot').textContent='Earn 10 XP per Athena quest, up to 3 per day. Completed tasks remain checked.';
+    const countedToday=todayEvents(ledger).filter(([,e])=>e.type==='athena').length;
+    if($('athena-dash-foot')) $('athena-dash-foot').textContent=`Athena XP today: ${Math.min(3,countedToday)*10}/30. Each quest completion can earn 10 XP once; further completions after the daily cap earn 0 XP.`;
     list.replaceChildren();
     const planId=String(saved.id || saved.savedAt || 'previous-plan').slice(0,80).replace(/[^a-zA-Z0-9_.:-]/g,'_');
     const completed=Array.isArray(saved.completed)?saved.completed:[];
@@ -134,7 +135,9 @@
       const info=document.createElement('span');info.className='athena-dash-quest-info';
       const heading=document.createElement('strong');heading.textContent=quest.title||`Quest ${i+1}`;
       const detail=document.createElement('small');detail.textContent=`${quest.island||'Study'} · ${quest.minutes||20} min · ${quest.detail||''}`;
-      info.append(heading,detail);label.append(box,info);
+      const status=document.createElement('span');status.className='ithaca-quest-reward';
+      status.textContent=box.checked ? (ledger.events[id] ? 'Completed · 10 XP recorded' : 'Completed · no new XP') : (countedToday>=3 ? 'Daily Athena XP limit reached · 0 XP' : 'Available · +10 XP');
+      info.append(heading,detail,status);label.append(box,info);
       box.addEventListener('change',()=>{
         if(!box.checked)return;
         const current=read(ATHENA_KEY,null);

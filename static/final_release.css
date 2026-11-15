@@ -1,0 +1,11 @@
+/* Local-first finish: additive, scoped styles, existing Ithaca layout unchanged. */
+.final-route-panel {margin:22px 0;padding:22px;border:1px solid rgba(96,218,243,.35);border-radius:20px;background:linear-gradient(135deg,rgba(0,105,172,.21),rgba(8,26,79,.12));color:inherit}
+.final-route-panel h2{margin:6px 0 8px;font-size:clamp(1.35rem,2.1vw,2rem)}
+.final-route-panel .hint{margin:8px 0 15px}
+.final-route-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.final-route-item{border:1px solid rgba(141,221,247,.3);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:9px;background:rgba(3,95,166,.26)}
+.final-route-item strong{font-size:1rem}.final-route-item span{font-size:.87rem;line-height:1.5;opacity:.9;flex:1}
+.final-route-item a{font-size:.85rem;font-weight:700;color:#9af6fa;text-decoration:underline;text-underline-offset:3px}
+.final-reward-status{padding:12px 14px;border-radius:11px;background:rgba(50,170,213,.15);font-size:.86rem;margin-top:12px;line-height:1.5}
+.athena-dash-quest .ithaca-quest-reward{display:block;font-size:.78rem;margin-top:4px;font-weight:700;color:#a3f7e5}
+@media(max-width:790px){.final-route-list{grid-template-columns:1fr}.final-route-panel{padding:16px}}

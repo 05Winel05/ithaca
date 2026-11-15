@@ -1,6 +1,11 @@
 """Independent, locally graded exam-category practice for Ithaca."""
 from flask import Blueprint, jsonify, render_template, request, session
 from exam_practice_data import BANK, CATALOG
+from exam_practice_more import expanded_questions
+# ITHACA_FINAL_RELEASE: add original advanced questions without replacing existing banks.
+for _exam, _questions in expanded_questions().items():
+    _existing = {q['id'] for q in BANK[_exam]}
+    BANK[_exam].extend(q for q in _questions if q['id'] not in _existing)
 
 exam_practice_bp = Blueprint('exam_practice', __name__)
 
@@ -25,24 +30,32 @@ def questions():
         return jsonify(error='Choose an exam category'), 400
     focus = payload.get('focus')
     level = payload.get('level', 'mixed')
-    if level not in ('mixed', 'foundation', 'intermediate'):
+    if level not in ('mixed', 'foundation', 'intermediate', 'advanced'):
         return jsonify(error='Invalid difficulty'), 400
     all_questions = BANK[exam]
     topics = {q['topic'] for q in all_questions}
     if focus is not None and focus not in topics:
         return jsonify(error='Invalid topic'), 400
-    filtered = [q for q in all_questions if (level == 'mixed' or q['difficulty'] == level)]
-    # Balance topics by round-robin rather than showing only the first subject.
-    # When a focus topic is chosen, allocate up to four of eight questions to it.
+    # Prefer unseen questions, balance topics and fall back to other difficulties
+    # when the chosen category contains fewer than eight questions.
+    seen = payload.get('seen', [])
+    if not isinstance(seen, list) or len(seen) > 200 or any(not isinstance(x,str) or len(x)>80 for x in seen):
+        return jsonify(error='Invalid seen-question list'), 400
+    seen_set = set(seen)
+    filtered = [q for q in all_questions if level == 'mixed' or q['difficulty'] == level]
     selected = []
-    if focus:
-        selected.extend(q for q in filtered if q['topic'] == focus)
-        selected = selected[:4]
-    by_topic = {topic: [q for q in filtered if q['topic'] == topic and q not in selected] for topic in sorted(topics)}
-    while len(selected) < 8 and any(by_topic.values()):
-        for topic in sorted(by_topic):
-            if by_topic[topic] and len(selected) < 8:
-                selected.append(by_topic[topic].pop(0))
+    def pick_from(pool, limit=8, focus_limit=4):
+        remaining = [q for q in pool if q['id'] not in {x['id'] for x in selected}]
+        ordered = sorted(remaining,key=lambda q:(q['id'] in seen_set,q['id']))
+        if focus and len(selected)<limit:
+            focused = [q for q in ordered if q['topic']==focus]
+            for q in focused[:max(0,min(focus_limit,limit-len(selected)))]:selected.append(q)
+        groups = {topic:[q for q in ordered if q['topic']==topic and q not in selected] for topic in sorted(topics)}
+        while len(selected)<limit and any(groups.values()):
+            for topic in sorted(groups):
+                if groups[topic] and len(selected)<limit:selected.append(groups[topic].pop(0))
+    pick_from(filtered)
+    if len(selected)<8:pick_from(all_questions,focus_limit=0)
     return jsonify(exam=exam, questions=[{k:v for k,v in q.items() if k not in ('correct','explanation')} for q in selected], topics=sorted(topics), level=level)
 
 @exam_practice_bp.post('/api/exam-center/grade')

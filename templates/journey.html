@@ -8,6 +8,7 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='gamification.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='final_release.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='dashboard_explorer.css') }}">
 </head>
 
@@ -133,7 +134,7 @@
       </div>
 
       <div class="practice-strip-actions">
-        <a href="{{ url_for('assessment') }}">Take a skill check ↗</a>
+        <a href="{{ url_for('assessment') }}">Take a skill check ↗</a><a href="/exam-center">SAT / ACT / English exams ↗</a>
         <a href="{{ url_for('progress') }}">View progress ↗</a>
       </div>
 
@@ -179,6 +180,16 @@
     </section>
 
     <!-- Odyssey Islands -->
+    <!-- ITHACA_FINAL_RELEASE: local-first recommended journey; original islands and quest mechanics unchanged -->
+    <section class="final-route-panel" id="final-route-panel" aria-label="Today's personalized learning route">
+      <span class="panel-index">TODAY / YOUR NEXT STEPS</span>
+      <h2>Your personalized daily route</h2>
+      <p class="hint" id="final-focus-note">Choose a practice goal for today.</p>
+      <div class="final-route-list" id="final-route-list"></div>
+      <p class="final-reward-status" id="final-xp-rule" aria-live="polite">Athena quests reward up to 30 XP per day.</p>
+      <p class="hint" id="final-day-summary" aria-live="polite"></p>
+      <p class="hint">These tasks use your existing daily checkboxes and XP; following a link alone does not award XP. Daily routes refresh on your local calendar date.</p>
+    </section>
     <div class="dashboard-layout">
 
       <section class="panel voyage-panel">
@@ -311,6 +322,7 @@
   <script src="{{ url_for('static', filename='sync.js') }}"></script>
 
   <script src="{{ url_for('static', filename='gamification.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='final_release.js') }}" defer></script>
 
 </body>
 </html>
