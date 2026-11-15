@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Odyssey — Ithaca</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard_explorer.css') }}">
 </head>
 <body class="dashboard">
   <header class="topbar wrap">
@@ -24,7 +25,13 @@
         <span class="card-caption">{{ 'University goals' if profile.universities else 'Exploring destinations' }} · {{ profile.get('entry_year') or 'Entry year undecided' }}</span>
       </aside>
     </div>
-    <div class="route-link-bar"><span>Explore admissions policies, funding options, and your next steps.</span><a href="{{ url_for('requirements') }}">Compare university paths ↗</a></div>
+    <div class="route-link-bar">
+      <span>Explore universities, admissions policies, funding options, and your next steps.</span>
+      <div class="route-link-actions">
+        <a href="{{ url_for('explorer.explore') }}">Explore Universities ↗</a>
+        <a href="{{ url_for('requirements') }}">Compare university paths ↗</a>
+      </div>
+    </div>
     <section class="plan-overview" aria-label="Your preparation plan">
       <div class="plan-cell">
         <span class="card-label">YOUR UNIVERSITIES</span>

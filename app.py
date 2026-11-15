@@ -293,6 +293,9 @@ def athena_plan():
     return jsonify(plan)
 
 
+from university_explorer import explorer_bp
+app.register_blueprint(explorer_bp)
+
 if __name__ == "__main__":
     # Local development only; disable debug mode before deployment.
     app.run(debug=True)

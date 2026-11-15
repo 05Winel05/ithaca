@@ -1,0 +1,22 @@
+/* Ithaca dashboard: additional navigation for University Explorer. */
+/* Loaded after style.css; keeps the rest of the existing design unchanged. */
+.route-link-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.route-link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.route-link-actions a {
+  display: inline-block;
+  white-space: nowrap;
+}
+@media (max-width: 620px) {
+  .route-link-actions { width: 100%; }
+}
