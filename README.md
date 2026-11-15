@@ -1,4 +1,3 @@
-
 # Ithaca — Your Journey to Your Dream University
 
 Ithaca is a Flask web application designed to help high school students organize their journey toward university admission.
@@ -32,153 +31,133 @@ Students can explore each area and complete preparation activities.
 
 ### 3. University Planning and Comparison
 
-The university planning feature includes:
+The university planning features include:
 
-- University preparation checklists.
-- Official admission and financial aid links.
-- Reference information for Stanford, MIT, and Rice University.
-- International and U.S. domestic financial aid summaries.
-- Guidance for researching universities outside the reference catalog.
+- A University Explorer with a curated catalog of 20 U.S. universities.
+- University profiles and side-by-side comparison of selected universities.
+- Preparation checklists and official admission and financial aid links where available.
+- Reference information about application documents, testing, costs, and financial aid; details vary by university and applicant type.
+- Guidance for U.S. domestic and international applicants and for researching schools outside the curated catalog.
 
-Students can open **Compare university paths** from the journey dashboard or select one of the five islands.
+Students can open **Explore Universities** or **Compare university paths** from My Odyssey. More detailed profiles and comparisons are available through the University Explorer.
 
-University information is provided as a planning reference. Ithaca does not automatically verify admission eligibility or calculate admission probabilities.
+University information is a planning reference, not a live admissions database. Ithaca does not automatically verify current requirements, determine admission eligibility, calculate admission probabilities, or guarantee scholarships. Always check the university's official website.
 
-### 4. Academic Practice
+### 4. Academic Practice and Exam Preparation
 
-The Exams area includes an eight-question academic skills check.
-
-Practice sets A and B cover:
+**General Skills:** The original eight-question academic check remains available as practice Sets A and B. These cover:
 
 - Numbers and proportions
 - Algebra and functions
 - Reading comprehension
 - Evidence-based reasoning
 
-After completing a practice set, students can view:
+**Exam Preparation Center:** A separate practice area is available for:
 
-- Total score
-- Performance by topic
-- Correct answers
-- Answer explanations
-- Suggested study areas
+- Digital SAT
+- ACT
+- TOEFL iBT
+- IELTS Academic
+- Duolingo English Test (DET)
 
-Results are saved locally in the browser and can optionally be backed up through MongoDB Atlas.
+The final local prototype includes **100 original exam-category questions (20 per exam)**, in addition to the General Skills questions. Practice is organized by topic and difficulty (**Foundation**, **Intermediate**, **Advanced**, and **Mixed**), with eight-question sets. The app prioritizes questions not previously seen in that browser where possible, but can reuse questions as the bank is exhausted.
 
-The My Progress page displays previous assessment attempts and learning history.
+Students can open the Exam Center at:
 
-These questions are original to Ithaca and are not official SAT, ACT, IELTS, TOEFL, or Duolingo English Test questions.
+[http://127.0.0.1:5000/exam-center](http://127.0.0.1:5000/exam-center)
 
-Practice scores are intended for learning feedback, not standardized proficiency measurement or admission predictions.
+After answering, students can review their score, performance by topic, correct answers, explanations, and suggested areas for further practice. The Exam Center links to official exam-provider preparation resources, including College Board and Khan Academy for SAT preparation.
+
+These are **original Ithaca short-form exercises**, not copied official test questions. They do not simulate every exam section or question type (for example, speaking or listening), and results are **not** official scores, score predictions, or admission-readiness measures.
+
+General Skills and exam-category attempts are saved in browser storage and can be included in optional MongoDB Atlas progress synchronization. My Progress displays both kinds of history.
 
 ### 5. Athena — Gemini-Powered AI Planning
 
-Athena is an AI-powered academic planning assistant that uses Google's Gemini API.
+Athena is an AI-powered academic planning assistant using Google's Gemini API. Students can open Athena from My Odyssey or visit:
 
-Students can open Athena from the dashboard or visit:
+[http://127.0.0.1:5000/athena](http://127.0.0.1:5000/athena)
 
-http://127.0.0.1:5000/athena
+With the student's consent, Athena uses selected profile and academic practice information to suggest:
 
-Athena uses selected student information to generate personalized preparation plans.
+- AI-generated study milestones and academic recommendations.
+- Four actionable study quests in each generated plan.
+- University preparation steps aligned with selected goals and study time.
+- Study priorities informed by the latest General Skills check and up to five recent exam-category practice summaries when available.
+- Adjusted plans for situations such as **Poseidon's Storm — I missed a week**.
 
-Features include:
+Athena quests appear in My Odyssey and can be marked completed there. Generating a new plan uses a Gemini API request; **daily route suggestions reuse existing saved data without an additional Gemini request**.
 
-- AI-generated study milestones
-- Personalized academic recommendations
-- Four actionable study quests
-- Planning based on selected universities and goals
-- Consideration of recent academic practice performance
-- Plan adjustment through Poseidon's Storm
+Athena requests consent before sending selected planning information to Gemini. AI-generated recommendations are suggestions, not verified university policies, and students must verify official requirements independently.
 
-**Poseidon's Storm — I missed a week**
+### 6. Gamification, XP, and My Odyssey
 
-This feature helps students adjust their preparation plan after falling behind.
+Ithaca uses daily activities and Athena quests to motivate consistent study:
 
-Athena requests user consent before sending selected planning information to Gemini.
+- **My Odyssey** displays the journey, universities, academic practice, Athena's current quests, level, and XP progress.
+- **Three daily quests** can be completed once per local calendar day; their completion status resets on the next day the app is opened or refreshed.
+- A **personalized daily route** recommends study activities using saved weak exam topics and unfinished Athena quests. Suggestions are selected locally and can link to focused practice.
+- **Athena quests** award **10 XP per eligible completion**, up to **30 Athena XP per day**. The interface explains when the daily limit is reached or a completion is not rewarded.
+- An XP event ledger records awarded rewards and guards against duplicate XP for the same task instance.
+- Levels increase every **50 total XP**: Level 1 begins at 0 XP, Level 2 at 50 XP, and so on.
+- Completion history and XP are shown in My Progress and can be included in optional MongoDB synchronization.
 
-Generated recommendations are suggestions, not verified university policies.
+The daily route is selected once per device-local day so it stays stable during the day. Daily quest completion is self-reported, and the date-based reset uses the device's clock. Athena does **not** automatically call Gemini or generate a new AI plan at midnight.
 
-### 6. Gamification and XP
-
-Ithaca uses a quest and XP system to encourage students to stay consistent.
-
-Features include:
-
-- Daily quests
-- XP rewards for completing quests
-- Student levels
-- Personalized Athena quests
-- Progress tracking
-- Completed quest history
-
-Personalized Athena quests award 10 XP each, with a maximum of 30 AI quest XP per day.
-
-The same completed quest cannot repeatedly award XP.
-
-XP is a motivational feature and does not represent academic proficiency or university admission readiness.
+XP is a motivational feature and does not represent academic proficiency or university admission readiness. The app protects against duplicate rewards, but it is not designed as an anti-cheat or verified study-time system.
 
 ### 7. Progress Tracking
 
-The My Progress area helps students monitor their activities.
+**My Progress** combines the original General Skills assessments with SAT, ACT, TOEFL, IELTS, and DET practice history. It includes:
 
-It includes:
+- Saved attempts and recent scores by exam category.
+- Topic performance, accuracy, and areas to strengthen.
+- Daily and Athena quest completion records.
+- Total XP, current level, and activity-related progress.
+- The currently saved Athena study plan and completed quest state.
 
-- Completed quests
-- XP and level progress
-- Academic practice history
-- Recent practice performance
-- Personalized Athena plan progress
-
-The browser uses local storage to preserve learning history.
-
-When MongoDB Atlas is configured, the application can additionally synchronize and back up supported progress information.
-
-There is no full user account authentication system in this version.
+Browser localStorage is the primary working copy. Supported records can synchronize to MongoDB Atlas when connected. No full user account authentication system is included in this version.
 
 ### 8. MongoDB Atlas Synchronization
 
-Ithaca supports optional MongoDB Atlas integration.
+Ithaca supports optional MongoDB Atlas integration to back up selected learning progress while continuing to work locally when MongoDB is unavailable.
 
-The application uses MongoDB to back up learning progress while keeping the browser as the working copy.
+Supported synced information includes:
 
-Features include:
+- General Skills and exam-category practice attempts.
+- Quest completion and the XP event ledger.
+- Saved Athena plan and quest state.
+- Other supported journey progress fields.
 
-- Optional cloud progress backup
-- Synchronization of supported quest and assessment data
-- Preservation of completed quests
-- Saved practice attempts
-- Saved Athena plan state
-- Browser-only operation when MongoDB is unavailable
+The main application collections include `profiles` and `progress`; the database may also contain diagnostic collections such as `connection_checks` from connection testing. The `progress` collection stores a state object containing supported browser history.
 
-MongoDB uses two collections:
-
-- `profiles`
-- `progress`
-
-The `progress` collection stores a state object containing supported learning history.
-
-Database integration is designed for local demonstration rather than production student accounts.
+Data is associated with a session identifier, **not a verified user account**. This is intended for a local demonstration, not production multi-user storage.
 
 ## Technology Stack
 
 **Backend**
+
 - Python
 - Flask
 
 **Frontend**
+
 - HTML
 - CSS
 - JavaScript
 
 **Artificial Intelligence**
+
 - Google Gemini API
 - Google GenAI Python SDK
 
 **Database**
+
 - MongoDB Atlas
 - PyMongo
 
 **Other Technologies**
+
 - Browser localStorage
 - Flask sessions
 - Git
@@ -186,14 +165,23 @@ Database integration is designed for local demonstration rather than production 
 
 ## Project Structure
 
+Selected files and directories in the final local prototype (not an exhaustive listing):
+
 ```text
 ithaca/
 ├── app.py
 ├── assessment_data.py
 ├── athena.py
+├── athena_context.py
 ├── database.py
 ├── database_status.py
+├── exam_practice.py
+├── exam_practice_data.py
+├── exam_practice_more.py
 ├── university_data.py
+├── university_explorer.py
+├── university_profiles.py
+├── university_profiles_data.py
 ├── requirements.txt
 ├── README.md
 ├── QUICK_START.md
@@ -201,21 +189,33 @@ ithaca/
 ├── .gitignore
 ├── static/
 │   ├── style.css
-│   └── sync.js
+│   ├── sync.js
+│   ├── gamification.js
+│   ├── gamification.css
+│   ├── exam_center.css
+│   ├── unified_progress.js
+│   ├── unified_progress.css
+│   ├── final_release.js
+│   └── final_release.css
 └── templates/
     ├── index.html
     ├── journey.html
     ├── requirements.html
     ├── assessment.html
+    ├── exam_center.html
+    ├── exam_quiz.html
     ├── progress.html
-    └── athena.html
+    ├── athena.html
+    ├── explorer.html
+    ├── university_profile.html
+    └── university_profiles.html
 ```
 
 ## Running on Windows
 
 ### Step 1 — Clone the Repository
 
-```powershell
+```
 git clone https://github.com/05Winel05/ithaca.git
 cd ithaca
 ```
@@ -224,13 +224,13 @@ Alternatively, open an existing copy of the `ithaca` folder in Visual Studio Cod
 
 ### Step 2 — Create a Virtual Environment
 
-```powershell
+```
 py -m venv .venv
 ```
 
 ### Step 3 — Install Dependencies
 
-```powershell
+```
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
@@ -238,13 +238,13 @@ py -m venv .venv
 
 Create a `.env` file using the example:
 
-```powershell
+```
 Copy-Item .env.example .env
 ```
 
 Open `.env` in VS Code and configure:
 
-```env
+```
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 GEMINI_MODEL=YOUR_MODEL_NAME
 
@@ -260,7 +260,7 @@ Gemini requires an API key and internet connection. MongoDB Atlas synchronizatio
 
 ### Step 5 — Start Flask
 
-```powershell
+```
 .\.venv\Scripts\python.exe app.py
 ```
 
@@ -268,7 +268,7 @@ Gemini requires an API key and internet connection. MongoDB Atlas synchronizatio
 
 Visit:
 
-http://127.0.0.1:5000
+[http://127.0.0.1:5000](http://127.0.0.1:5000/)
 
 ### Step 7 — Stop the Application
 
@@ -276,7 +276,7 @@ Press **Ctrl+C** in the terminal.
 
 ## Configuring Gemini AI
 
-1. Visit https://aistudio.google.com/apikey
+1. Visit [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
 2. Create a Gemini API key.
 3. Add the key to your `.env` file.
 4. Configure `GEMINI_MODEL` for a model available to your API key.
@@ -301,9 +301,10 @@ With consent, Athena can send:
 - Study time
 - Academic interests
 - Scholarship priority
-- Latest topic-level practice results, when available
+- Latest General Skills topic-level results, when available
+- Up to five recent exam-category practice summaries, when available
 
-The application does not intentionally send names, email addresses, individual question responses, or the complete assessment history to Gemini.
+The application does not intentionally send names, email addresses, individual question responses, or the complete assessment history to Gemini. Only selected recent practice summaries are included with consent.
 
 Generated plans are saved in browser local storage and may be included in MongoDB progress backups when enabled.
 
@@ -315,7 +316,7 @@ New plans replace the current active plan.
 
 Visit:
 
-https://www.mongodb.com/cloud/atlas/register
+[https://www.mongodb.com/cloud/atlas/register](https://www.mongodb.com/cloud/atlas/register)
 
 Create an Atlas account and database cluster.
 
@@ -343,7 +344,7 @@ Copy the connection string provided by MongoDB Atlas.
 
 Add:
 
-```env
+```
 MONGODB_URI=mongodb+srv://YOUR_DATABASE_USER:YOUR_DATABASE_PASSWORD@YOUR-CLUSTER.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DB=ithaca
 ```
@@ -358,13 +359,13 @@ Keep the Gemini configuration in the same `.env` file.
 
 Install the project dependencies if needed:
 
-```powershell
+```
 python -m pip install -r requirements.txt
 ```
 
 Run:
 
-```powershell
+```
 python database_status.py
 ```
 
@@ -373,7 +374,7 @@ A successful test confirms connectivity and database read, write, and delete acc
 ### Step 7 — Test Synchronization
 
 1. Start the Flask application.
-2. Open http://127.0.0.1:5000.
+2. Open [http://127.0.0.1:5000](http://127.0.0.1:5000/).
 3. Create a fictional student profile.
 4. Complete a quest or academic practice set.
 5. Open My Progress.
@@ -405,6 +406,8 @@ The application remains usable with browser storage if MongoDB is not configured
 6. Open My Progress.
 7. Complete practice set B.
 8. Confirm that both attempts are saved.
+9. Open `/exam-center` and select SAT, ACT, TOEFL, IELTS, or DET.
+10. Try an Advanced eight-question set, check explanations, and verify the new attempt in My Progress.
 
 ### Athena AI
 
@@ -415,13 +418,14 @@ The application remains usable with browser storage if MongoDB is not configured
 5. Review personalized milestones.
 6. Complete an AI-generated quest.
 7. Test Poseidon's Storm to adjust the plan.
+8. Return to My Odyssey, mark a quest complete, and check XP and completion feedback.
 
 ### MongoDB Synchronization
 
 1. Confirm MongoDB connectivity.
 2. Complete a quest or practice set.
 3. Check the synchronization status.
-4. Verify records in Atlas Data Explorer.
+4. Verify records in Atlas Data Explorer, including exam history and the `ithaca-xp-ledger-v1` state when present.
 5. Refresh the application.
 6. Confirm progress remains available.
 
@@ -458,6 +462,8 @@ Do not use real minors' personal information, sensitive educational records, or 
 - Scholarship eligibility is not automatically determined.
 - Academic practice questions are not official standardized examination questions.
 - Practice sets have not been statistically equated or validated.
+- The five exam categories use limited original short-form exercises and do not reproduce full standardized exams.
+- Daily quest resets use the device-local calendar day, and completed activities are self-reported.
 - AI recommendations may contain inaccurate or outdated information.
 - MongoDB synchronization does not provide authenticated multi-user accounts.
 - Browser data can be lost if local storage is cleared.
@@ -476,45 +482,45 @@ The reference university information was reviewed on November 14, 2026. Policies
 
 First-year admission:
 
-https://admission.stanford.edu/apply/first-year/
+[https://admission.stanford.edu/apply/first-year/](https://admission.stanford.edu/apply/first-year/)
 
 Undergraduate financial aid:
 
-https://financialaid.stanford.edu/undergrad/apply/index.html
+[https://financialaid.stanford.edu/undergrad/apply/index.html](https://financialaid.stanford.edu/undergrad/apply/index.html)
 
 ### Massachusetts Institute of Technology (MIT)
 
 First-year admission:
 
-https://mitadmissions.org/apply/firstyear/deadlines-requirements/
+[https://mitadmissions.org/apply/firstyear/deadlines-requirements/](https://mitadmissions.org/apply/firstyear/deadlines-requirements/)
 
 Undergraduate financial aid:
 
-https://sfs.mit.edu/undergraduate-students/apply-for-aid/deadlines-process/
+[https://sfs.mit.edu/undergraduate-students/apply-for-aid/deadlines-process/](https://sfs.mit.edu/undergraduate-students/apply-for-aid/deadlines-process/)
 
 ### Rice University
 
 International admission:
 
-https://admission.rice.edu/apply/first-year-international-applicants
+[https://admission.rice.edu/apply/first-year-international-applicants](https://admission.rice.edu/apply/first-year-international-applicants)
 
 Domestic admission:
 
-https://admission.rice.edu/apply/first-year-domestic-applicants
+[https://admission.rice.edu/apply/first-year-domestic-applicants](https://admission.rice.edu/apply/first-year-domestic-applicants)
 
 International financial aid:
 
-https://financialaid.rice.edu/apply-aid/international-students
+[https://financialaid.rice.edu/apply-aid/international-students](https://financialaid.rice.edu/apply-aid/international-students)
 
 Financial aid:
 
-https://financialaid.rice.edu/
+[https://financialaid.rice.edu/](https://financialaid.rice.edu/)
 
 Students should verify all deadlines, admission requirements, and financial aid policies directly through official university websites.
 
 ## Credits and Disclosures
 
-Ithaca was developed with assistance from ChatGPT, including application scaffolding and code suggestions.
+Ithaca was developed with assistance from ChatGPT, including application scaffolding, code suggestions, and iterative feature upgrades.
 
 The project uses Google's Gemini API for AI-powered academic planning and MongoDB Atlas for optional progress backup.
 
@@ -524,7 +530,7 @@ AI assistance and third-party components should also be disclosed in the HackUTA
 
 ## GitHub Repository
 
-https://github.com/05Winel05/ithaca
+[https://github.com/05Winel05/ithaca](https://github.com/05Winel05/ithaca)
 
 ## Project Purpose
 
