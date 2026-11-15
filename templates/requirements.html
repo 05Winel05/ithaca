@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>University paths — Ithaca</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dashboard">
+  <header class="topbar wrap">
+    <a class="brand" href="/" aria-label="Ithaca home"><span class="brand-mark">✦</span> ITHACA<span class="dot">.</span></a>
+    <a class="quiet-link" href="{{ url_for('journey') }}">Back to my Odyssey ↗</a>
+  </header>
+  <main class="wrap requirements-main">
+    <div class="eyebrow"><span class="line"></span> CHART YOUR COURSE</div>
+    <div class="requirements-heading">
+      <div>
+        <h1>Know the route.<br><em>Shape the journey.</em></h1>
+        <p class="lead compact">Compare your university goals, discover application paths, and plan what to work on next.</p>
+      </div>
+      <div class="entry-indicator"><span class="card-label">YOUR DESTINATION YEAR</span><strong>{{ profile.get('entry_year') or 'Not selected' }}</strong><span class="card-caption">Grade {{ profile.grade }} · {{ profile.interest }}</span></div>
+    </div>
+
+    <div class="info-banner" role="note">
+      <span class="info-symbol">✧</span>
+      <p>Information below reflects publicly published university policies reviewed November 14, 2026. It may not apply to your selected entry year. Always confirm deadlines, requirements, and eligibility on each university's official website.</p>
+    </div>
+
+    <section class="requirements-tools">
+      <div>
+        <span class="panel-index">01 / YOUR UNIVERSITIES</span>
+        <h2>Compare destinations</h2>
+      </div>
+      <form class="applicant-form" action="{{ url_for('requirements') }}" method="get">
+        <label for="applicant">Applicant category</label>
+        <select id="applicant" name="applicant">
+          <option value="international" {% if applicant_type == 'international' %}selected{% endif %}>International</option>
+          <option value="domestic" {% if applicant_type == 'domestic' %}selected{% endif %}>U.S. domestic</option>
+        </select>
+        <button class="secondary-btn" type="submit">Update view</button>
+      </form>
+    </section>
+
+    <div class="school-grid">
+      {% for school in schools %}
+      {% if school.recognized %}
+      <article class="panel university-card">
+        <div class="school-card-top">
+          <span class="panel-index">DESTINATION {{ '%02d'|format(loop.index) }}</span>
+          <span class="policy-chip {{ school.testing_kind }}">{{ 'Testing required' if school.testing_kind == 'required' else 'Testing recommended' }}</span>
+        </div>
+        <h3>{{ school.short_name }}</h3>
+        <p class="card-caption">{{ school.location }}</p>
+        <div class="school-detail"><span>APPLICATION</span><strong>{{ school.application }}</strong></div>
+        <div class="school-detail"><span>STANDARDIZED TESTS</span><strong>{{ school.testing }}</strong><p>{{ school.testing_detail }}</p></div>
+        <div class="school-detail"><span>POSTED APPLICATION DATES</span><strong>{{ school.deadlines }}</strong><p>Recheck for your entry year and admission round.</p></div>
+        <div class="school-detail"><span>COMMON APPLICATION MATERIALS</span>
+          <ul>{% for material in school.materials %}<li>{{ material }}</li>{% endfor %}</ul>
+          <p>{{ school.additional }}</p>
+        </div>
+        <div class="school-detail funding-detail"><span>FINANCIAL AID · {{ 'INTERNATIONAL' if applicant_type == 'international' else 'U.S. DOMESTIC' }}</span><p>{{ school.aid_international if applicant_type == 'international' else school.aid_domestic }}</p></div>
+        <div class="school-links">
+          <a href="{{ school.domestic_admission_url if applicant_type == 'domestic' and school.domestic_admission_url is defined else school.admission_url }}" target="_blank" rel="noopener noreferrer">Official admissions ↗</a>
+          <a href="{{ school.domestic_aid_url if applicant_type == 'domestic' and school.domestic_aid_url is defined else school.aid_url }}" target="_blank" rel="noopener noreferrer">Financial aid ↗</a>
+        </div>
+      </article>
+      {% else %}
+      <article class="panel university-card unknown-card">
+        <span class="panel-index">DESTINATION {{ '%02d'|format(loop.index) }}</span>
+        <h3>{{ school.name }}</h3>
+        <p class="hint">This university is not in Ithaca's reference library yet. Check its official admissions and financial-aid pages before making a plan. No requirements or deadlines are assumed.</p>
+        <span class="policy-chip">Research needed</span>
+      </article>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    <section class="planning-section" id="planning">
+      <div class="section-title">
+        <div><span class="panel-index">02 / YOUR NEXT STEPS</span><h2>Prepare for the voyage</h2><p class="hint">Use these actions to organize your work. Completing a preparation step does not guarantee admission.</p></div>
+        <p class="step-progress" id="step-progress" aria-live="polite">0 steps completed</p>
+      </div>
+      <div class="panel prep-list">
+        {% for step in steps %}
+        <label class="prep-item">
+          <input type="checkbox" data-prep-step="{{ step.id }}">
+          <span><strong>{{ step.title }}</strong><small>{{ step.detail }}</small></span>
+          <span class="step-island">{{ step.island|capitalize }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="island-guide" id="islands">
+      <div class="section-title"><div><span class="panel-index">03 / THE FIVE ISLANDS</span><h2>Explore every path</h2></div></div>
+      <div class="guide-grid">
+        <article class="panel guide-card" id="academics"><span class="guide-icon">✦</span><h3>Academics</h3><p>Keep a record of grades, course difficulty, and subjects you want to strengthen.</p><a href="#planning">View preparation steps ↗</a></article>
+        <article class="panel guide-card" id="exams"><span class="guide-icon">◇</span><h3>Exams</h3><p>Understand which universities require test scores and use practice results to guide studying.</p><a href="{{ url_for('assessment') }}">Try academic practice ↗</a></article>
+        <article class="panel guide-card" id="achievements"><span class="guide-icon">★</span><h3>Achievements</h3><p>Build authentic projects and activities; document your work and its impact.</p><a href="#planning">View preparation steps ↗</a></article>
+        <article class="panel guide-card" id="applications"><span class="guide-icon">✧</span><h3>Applications</h3><p>Organize essays, recommendations, application platforms, and deadlines.</p><a href="#planning">View preparation steps ↗</a></article>
+        <article class="panel guide-card" id="scholarships"><span class="guide-icon">◈</span><h3>Scholarships</h3><p>Compare need-based aid and merit options separately from admission criteria.</p><a href="#planning">View preparation steps ↗</a></article>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap foot">EVERY GREAT JOURNEY BEGINS WITH ONE STEP <span>ITHACA / 2026</span></footer>
+  <script src="{{ url_for('static', filename='sync.js') }}"></script>
+  <script>
+    window.IthacaSync.ready.then(() => {
+    const profile = {{ profile | tojson }};
+    const schools = {{ schools | tojson }};
+    const key = 'ithaca-preparation:' + [profile.entry_year || 'general', ...schools.map(s => s.requested_name.toLowerCase())].join('|');
+    const steps = [...document.querySelectorAll('[data-prep-step]')];
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(key) || '{}'); } catch (_) { saved = {}; }
+    steps.forEach(input => { input.checked = Boolean(saved[input.dataset.prepStep]); });
+    function saveProgress() {
+      const data = {};
+      steps.forEach(input => { data[input.dataset.prepStep] = input.checked; });
+      localStorage.setItem(key, JSON.stringify(data));
+      window.IthacaSync.save();
+      const count = steps.filter(input => input.checked).length;
+      document.getElementById('step-progress').textContent = `${count} of ${steps.length} steps completed`;
+    }
+    steps.forEach(input => input.addEventListener('change', saveProgress));
+    saveProgress();
+    });
+  </script>
+</body>
+</html>

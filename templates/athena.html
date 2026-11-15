@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athena — Ithaca</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar wrap">
+    <a class="brand" href="{{ url_for('journey') }}"><span class="brand-mark">✦</span> ITHACA<span class="dot">.</span></a>
+    <nav class="assessment-nav" aria-label="Navigation">
+      <a href="{{ url_for('journey') }}">My Odyssey</a>
+      <a href="{{ url_for('progress') }}">My progress</a>
+      <a href="{{ url_for('requirements') }}">University paths</a>
+    </nav>
+  </header>
+  <main class="wrap athena-main">
+    <div class="eyebrow"><span class="line"></span> YOUR GUIDE THROUGH THE ODYSSEY</div>
+    <div class="athena-intro">
+      <div>
+        <h1>Meet <em>Athena.</em></h1>
+        <p class="lead compact">Shape a learning journey around your goals, your progress, and the time you actually have.</p>
+      </div>
+      <div class="athena-orb" aria-hidden="true">✧</div>
+    </div>
+    <div class="athena-columns">
+      <section class="panel athena-form-card">
+        <span class="panel-index">01 / YOUR JOURNEY</span>
+        <h2>Choose your next move</h2>
+        <div class="athena-context">
+          <div><span class="card-label">CURRENT GRADE</span><strong>Grade {{ profile.grade }}</strong></div>
+          <div><span class="card-label">STUDY TIME</span><strong>{{ profile.study_hours }} hours/week</strong></div>
+          <div><span class="card-label">DESTINATION</span><strong>{{ profile.destination }}</strong></div>
+          <div><span class="card-label">PRACTICE</span><strong id="latest-practice">Checking history…</strong></div>
+        </div>
+        <label class="athena-field" for="scenario"><span>What's happening on your journey?</span>
+          <select id="scenario">
+            <option value="steady">I'm ready for my next steps</option>
+            <option value="missed_week">Poseidon's Storm — I missed a week</option>
+            <option value="score_drop">Poseidon's Storm — my practice score dropped</option>
+            <option value="less_time">Poseidon's Storm — I have less time now</option>
+          </select>
+        </label>
+        <label class="athena-consent">
+          <input type="checkbox" id="consent">
+          <span>Use my grade, study goals, selected universities, and latest practice topic scores to make a plan with Gemini. Please use fictional or non-sensitive student information while testing.</span>
+        </label>
+        <button type="button" class="primary athena-generate" id="generate">Build my journey ↗</button>
+        <p id="athena-error" class="form-error" role="alert" hidden></p>
+        <p class="hint athena-disclaimer">Athena creates study suggestions, not verified admissions decisions. Confirm university requirements and deadlines using their official websites.</p>
+      </section>
+      <section class="panel athena-result-card" id="athena-empty">
+        <span class="panel-index">02 / YOUR PATH</span>
+        <div class="athena-compass" aria-hidden="true">✦</div>
+        <h2>Every journey needs a course.</h2>
+        <p class="hint">Ask Athena for a practical study plan. After a setback, choose a storm to see how your route changes.</p>
+        <div class="athena-steps"><span>01 · Explore your goals</span><span>02 · Choose your focus</span><span>03 · Follow your quests</span></div>
+      </section>
+    </div>
+    <section id="athena-result" class="athena-plan" hidden>
+      <div class="athena-plan-heading">
+        <div><span class="panel-index">03 / YOUR NEXT CHAPTER</span><h2 id="plan-heading">Your next steps</h2><p class="hint" id="plan-summary"></p></div>
+        <div class="athena-focus"><span class="card-label">CURRENT FOCUS</span><strong id="plan-focus">—</strong></div>
+      </div>
+      <section class="panel athena-adaptation"><span class="panel-index">ATHENA'S GUIDANCE</span><p id="plan-adaptation"></p></section>
+      <div class="athena-section-head"><h2>The islands ahead</h2><span class="hint">Small, meaningful milestones</span></div>
+      <div class="athena-milestone-grid" id="milestones"></div>
+      <div class="athena-section-head"><h2>Your next four quests</h2><span class="hint">Mark them complete on the voyage dashboard</span></div>
+      <div class="athena-quest-grid" id="quests"></div>
+      <div class="athena-actions">
+        <a class="primary athena-open" href="{{ url_for('journey') }}">Follow my quests ↗</a>
+        <a class="secondary-btn athena-open" href="{{ url_for('assessment') }}">Practice another skill</a>
+      </div>
+      <p class="hint athena-disclaimer" id="plan-source"></p>
+    </section>
+    <p class="hint athena-privacy">Your generated plan and checkmarks stay in this browser and are backed up to MongoDB when connected. Gemini processes the study details you choose to share when you generate a plan. Do not enter sensitive information.</p>
+  </main>
+  <footer class="wrap foot">THE ODYSSEY CHANGES. YOUR GOALS STILL MATTER. <span>ITHACA / 2026</span></footer>
+  <script src="{{ url_for('static', filename='sync.js') }}"></script>
+  <script>
+    window.IthacaSync.ready.then(() => {
+    const profile = {{ profile|tojson }};
+    const profileSignature = JSON.stringify([profile.grade, profile.interest, profile.study_hours, profile.universities || [], profile.entry_year]);
+    const planKey = 'ithaca-athena-current-v1';
+    const historyKey = 'ithaca-assessments-v1';
+    const generateButton = document.getElementById('generate');
+    const errorNode = document.getElementById('athena-error');
+    let latest = null;
+    try {
+      const attempts = JSON.parse(localStorage.getItem(historyKey) || '[]');
+      if (Array.isArray(attempts) && attempts.length) latest = attempts[attempts.length - 1];
+    } catch (_) { latest = null; }
+    document.getElementById('latest-practice').textContent = latest ? `${latest.score}/${latest.total} · Set ${latest.form}` : 'Not assessed yet';
+
+    function node(tag, cls, text) {
+      const item = document.createElement(tag);
+      if (cls) item.className = cls;
+      if (text !== undefined) item.textContent = text;
+      return item;
+    }
+    function renderPlan(plan, when) {
+      document.getElementById('athena-empty').hidden = true;
+      document.getElementById('athena-result').hidden = false;
+      document.getElementById('plan-heading').textContent = plan.heading;
+      document.getElementById('plan-summary').textContent = plan.summary;
+      document.getElementById('plan-focus').textContent = plan.focus;
+      document.getElementById('plan-adaptation').textContent = plan.adaptation;
+      document.getElementById('plan-source').textContent = 'Created with Gemini' + (when ? ' · ' + new Date(when).toLocaleString() : '') + '. This plan uses your practice results, not official exam scores. Requirements must be verified separately.';
+      const milestones = document.getElementById('milestones');
+      const quests = document.getElementById('quests');
+      milestones.replaceChildren();
+      quests.replaceChildren();
+      plan.milestones.forEach((m, i) => {
+        const card = node('article', 'panel athena-milestone');
+        card.appendChild(node('span', 'panel-index', `${String(i+1).padStart(2,'0')} / ${m.island.toUpperCase()}`));
+        card.appendChild(node('h3', '', m.title));
+        card.appendChild(node('p', 'hint', m.reason));
+        card.appendChild(node('p', 'athena-next-action', m.action));
+        milestones.appendChild(card);
+      });
+      plan.quests.forEach((q, i) => {
+        const card = node('article', 'panel athena-quest-card');
+        card.appendChild(node('span', 'panel-index', `${String(i+1).padStart(2,'0')} / ${q.island.toUpperCase()} · ${q.minutes} MIN`));
+        card.appendChild(node('h3', '', q.title));
+        card.appendChild(node('p', 'hint', q.detail));
+        quests.appendChild(card);
+      });
+    }
+    try {
+      const stored = JSON.parse(localStorage.getItem(planKey) || 'null');
+      if (stored && stored.signature === profileSignature && stored.plan && Array.isArray(stored.plan.quests)) {
+        renderPlan(stored.plan, stored.savedAt);
+      }
+    } catch (_) {}
+
+    generateButton.addEventListener('click', async () => {
+      errorNode.hidden = true;
+      if (!document.getElementById('consent').checked) {
+        errorNode.textContent = 'Please check the sharing agreement before continuing.';
+        errorNode.hidden = false;
+        return;
+      }
+      const scenario = document.getElementById('scenario').value;
+      generateButton.disabled = true;
+      generateButton.textContent = scenario === 'steady' ? 'Planning your journey…' : 'Finding a new route…';
+      try {
+        const response = await fetch({{ url_for('athena_plan')|tojson }}, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({consent: true, scenario, assessment: latest ? {
+            form: latest.form, score: latest.score, total: latest.total, topics: latest.topics
+          } : null})
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Athena could not create a plan.');
+        const stored = {signature: profileSignature, savedAt: new Date().toISOString(), id: Date.now().toString(), plan: data, completed: []};
+        localStorage.setItem(planKey, JSON.stringify(stored));
+        window.IthacaSync.save();
+        renderPlan(data, stored.savedAt);
+        document.getElementById('athena-result').scrollIntoView({behavior: 'smooth'});
+      } catch (error) {
+        errorNode.textContent = error.message || 'There was a problem. Please try again.';
+        errorNode.hidden = false;
+      } finally {
+        generateButton.disabled = false;
+        generateButton.textContent = 'Build my journey ↗';
+      }
+    });
+    });
+  </script>
+</body>
+</html>

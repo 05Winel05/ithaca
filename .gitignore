@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+instance/
+.vscode/
+.DS_Store
+# Keep provider credentials out of version control.
+.env
+!.env.example

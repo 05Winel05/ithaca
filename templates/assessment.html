@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Academic practice — Ithaca</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar wrap">
+    <a class="brand" href="{{ url_for('journey') }}"><span class="brand-mark">✦</span> ITHACA<span class="dot">.</span></a>
+    <nav class="assessment-nav" aria-label="Navigation"><a href="{{ url_for('journey') }}">My journey</a><a href="{{ url_for('progress') }}">My progress</a></nav>
+  </header>
+  <main class="wrap practice-main">
+    <div class="eyebrow"><span class="line"></span> THE EXAMS ISLAND</div>
+    <div class="practice-heading">
+      <div><h1>Find your <em>starting point.</em></h1><p class="lead compact">An eight-question practice check across mathematical and reading skills. Use the results to choose what to study next.</p></div>
+      <div class="practice-count"><span class="card-label">PRACTICE SET</span><strong>{{ form }}</strong><span class="card-caption">8 original questions · no timer</span></div>
+    </div>
+    <div class="info-banner practice-note"><span class="info-symbol">◇</span><p>This is a short Ithaca skills check, not an official SAT, ACT, IELTS, TOEFL, or admissions test. Two sets cover similar topics, but their scores are not statistically equated. Use the feedback as a learning guide, not an admissions prediction.</p></div>
+
+    <form id="assessment-form" class="assessment-form" novalidate>
+      {% for question in questions %}
+      <fieldset class="panel question-card">
+        <legend class="question-number">QUESTION {{ '%02d' | format(loop.index) }} / {{ topics[question.topic].title }}</legend>
+        {% if question.passage %}<div class="reading-passage">{{ question.passage }}</div>{% endif %}
+        <h2>{{ question.text }}</h2>
+        <div class="answer-options">
+          {% for option in question.options %}
+          <label class="answer-option"><input type="radio" name="{{ question.id }}" value="{{ loop.index0 }}" required><span>{{ option }}</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endfor %}
+      <div class="submit-row"><span class="hint">Answer all eight questions to see your results and explanations.</span><button class="primary assessment-submit" type="submit" id="submit-assessment">Check my answers ↗</button></div>
+      <p id="submit-error" class="form-error" role="alert" hidden></p>
+    </form>
+
+    <section class="results-section" id="results-section" hidden aria-live="polite">
+      <div class="panel results-overview"><span class="panel-index">YOUR PRACTICE RESULTS</span><h2 id="result-heading"></h2><p id="result-subtitle" class="hint"></p><div id="result-topics" class="topic-grid"></div></div>
+      <div class="panel results-review"><h2>Review your answers</h2><p class="hint">Read the explanations, especially for questions you missed.</p><div id="result-review" class="review-list"></div></div>
+      <div class="panel results-next"><h2>What to focus on next</h2><ul id="result-next-steps"></ul><div class="result-actions"><a class="action-link" href="{{ url_for('progress') }}">View my progress ↗</a><a class="action-link" id="next-set" href="{{ url_for('assessment', form='B' if form == 'A' else 'A') }}">Try another practice set ↗</a><a class="action-link" href="{{ url_for('journey') }}">Return to my journey ↗</a></div></div>
+    </section>
+  </main>
+  <footer class="wrap foot">ONE STEP CLOSER TO YOUR DESTINATION <span>ITHACA / 2026</span></footer>
+  <script src="{{ url_for('static', filename='sync.js') }}"></script>
+  <script>
+    window.IthacaSync.ready.then(() => {
+    const formName = {{ form|tojson }};
+    const questionIds = {{ question_ids|tojson }};
+    const historyKey = 'ithaca-assessments-v1';
+    const assessmentForm = document.getElementById('assessment-form');
+    const errorNode = document.getElementById('submit-error');
+
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function saveAttempt(result) {
+      let attempts = [];
+      try {
+        const stored = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        if (Array.isArray(stored)) attempts = stored;
+      } catch (_) { attempts = []; }
+      attempts.push({
+        date: new Date().toISOString(),
+        form: result.form,
+        score: result.score,
+        total: result.total,
+        percentage: result.percentage,
+        topics: result.topics
+      });
+      try { localStorage.setItem(historyKey, JSON.stringify(attempts.slice(-30))); window.IthacaSync.save(); }
+      catch (_) { errorNode.hidden = false; errorNode.textContent = 'Results were calculated, but this browser could not save the attempt.'; }
+    }
+
+    function showResult(result) {
+      document.getElementById('results-section').hidden = false;
+      document.getElementById('result-heading').textContent = result.score + ' out of ' + result.total + ' correct';
+      document.getElementById('result-subtitle').textContent = result.percentage + '% correct · Practice set ' + result.form;
+      const topics = document.getElementById('result-topics');
+      topics.replaceChildren();
+      for (const topic of Object.values(result.topics)) {
+        const block = element('div', 'topic-result');
+        block.appendChild(element('strong', '', topic.title));
+        block.appendChild(element('span', 'topic-stat', topic.correct + ' / ' + topic.total));
+        const bar = element('div', 'topic-meter');
+        const fill = element('div', 'topic-fill');
+        fill.style.width = (topic.correct / topic.total * 100) + '%';
+        bar.appendChild(fill);
+        block.appendChild(bar);
+        topics.appendChild(block);
+      }
+      const review = document.getElementById('result-review');
+      review.replaceChildren();
+      for (const answer of result.review) {
+        const item = element('article', 'review-item');
+        item.appendChild(element('div', answer.correct ? 'review-status right-answer' : 'review-status wrong-answer', answer.correct ? 'Correct' : 'Review'));
+        item.appendChild(element('h3', '', answer.text));
+        item.appendChild(element('p', '', 'Your answer: ' + answer.your_answer));
+        if (!answer.correct) item.appendChild(element('p', '', 'Correct answer: ' + answer.correct_answer));
+        item.appendChild(element('p', 'review-explanation', answer.explanation));
+        review.appendChild(item);
+      }
+      const next = document.getElementById('result-next-steps');
+      next.replaceChildren();
+      for (const tip of result.next_steps) next.appendChild(element('li', '', tip));
+      assessmentForm.hidden = true;
+      document.getElementById('results-section').scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+
+    assessmentForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorNode.hidden = true;
+      const answers = {};
+      for (const id of questionIds) {
+        const checked = assessmentForm.querySelector('input[name="' + id + '"]:checked');
+        if (!checked) { errorNode.hidden = false; errorNode.textContent = 'Please answer every question before submitting.'; return; }
+        answers[id] = Number(checked.value);
+      }
+      const button = document.getElementById('submit-assessment');
+      button.disabled = true;
+      button.textContent = 'Checking answers…';
+      try {
+        const response = await fetch({{ url_for('grade_assessment')|tojson }}, {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({form: formName, answers: answers})
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'The assessment could not be scored.');
+        saveAttempt(result);
+        showResult(result);
+      } catch (error) {
+        errorNode.hidden = false;
+        errorNode.textContent = error.message || 'Something went wrong. Try again.';
+        button.disabled = false;
+        button.textContent = 'Check my answers ↗';
+      }
+    });
+    });
+  </script>
+</body>
+</html>

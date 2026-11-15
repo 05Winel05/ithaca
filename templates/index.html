@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ithaca — Begin your journey</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="landing">
+  <header class="topbar wrap">
+    <a class="brand" href="/" aria-label="Ithaca home"><span class="brand-mark">✦</span> ITHACA<span class="dot">.</span></a>
+    {% if profile %}<a class="quiet-link" href="{{ url_for('journey') }}">Return to my journey ↗</a>{% else %}<span class="edition">YOUR COLLEGE JOURNEY</span>{% endif %}
+  </header>
+  <main class="wrap landing-grid">
+    <section class="hero">
+      <div class="eyebrow"><span class="line"></span> YOUR FUTURE IS A JOURNEY</div>
+      <h1>Every dream<br>has a <em>destination.</em></h1>
+      <p class="lead">Turn your university ambitions into an Odyssey. Explore milestones, complete daily quests, and become the hero of your own story.</p>
+      <div class="legend"><span>01 · Choose your Ithaca</span><span>02 · Explore islands</span><span>03 · Level up</span></div>
+      <div class="starfield" aria-hidden="true"><span>✶</span><span>✧</span><span>✦</span></div>
+    </section>
+    <section class="panel onboarding" aria-labelledby="start-heading">
+      <div class="panel-head"><div class="panel-index">01 / YOUR PROFILE</div><div class="small-glyph">↗</div></div>
+      <h2 id="start-heading">{{ 'Edit your journey' if profile else 'Begin your Odyssey' }}</h2>
+      <p class="hint">Tell us where you are today and what you want to work toward.</p>
+      <form action="{{ url_for('start') }}" method="post" id="start-form">
+        <label for="grade">Your current grade</label>
+        <select id="grade" name="grade" required>
+          <option value="" disabled {% if not profile.get('grade') %}selected{% endif %}>Choose grade</option>
+          {% for grade in ['9', '10', '11', '12'] %}
+          <option value="{{ grade }}" {% if profile.get('grade') == grade %}selected{% endif %}>Grade {{ grade }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="mode">Where are you heading?</label>
+        <select id="mode" name="mode">
+          <option value="general" {% if profile.get('mode', 'general') == 'general' %}selected{% endif %}>I'm exploring universities</option>
+          <option value="specific" {% if profile.get('mode') == 'specific' %}selected{% endif %}>I have dream universities in mind</option>
+        </select>
+        {% set university_list = profile.get('universities', [profile.get('destination', '')] if profile.get('mode') == 'specific' else []) %}
+        <div id="specific-field" hidden>
+          <label for="university">First university</label>
+          <input id="university" name="university" placeholder="e.g. North American University" maxlength="80" value="{{ university_list[0] if university_list|length > 0 else '' }}">
+          <label for="university_2">Second university (optional)</label>
+          <input id="university_2" name="university_2" placeholder="Another university" maxlength="80" value="{{ university_list[1] if university_list|length > 1 else '' }}">
+          <label for="university_3">Third university (optional)</label>
+          <input id="university_3" name="university_3" placeholder="Another university" maxlength="80" value="{{ university_list[2] if university_list|length > 2 else '' }}">
+        </div>
+
+        <label for="interest">Field of interest</label>
+        <select id="interest" name="interest">
+          {% for interest in ['Undecided', 'Computer Science', 'Engineering', 'Medicine / Health', 'Business', 'Arts and Humanities', 'Natural Sciences', 'Social Sciences'] %}
+          <option value="{{ interest }}" {% if profile.get('interest', 'Undecided') == interest %}selected{% endif %}>{{ 'Still exploring' if interest == 'Undecided' else interest }}</option>
+          {% endfor %}
+        </select>
+
+        <div class="field-pair">
+          <div>
+            <label for="study_hours">Study time each week</label>
+            <select id="study_hours" name="study_hours">
+              {% for hours in ['1-3', '4-6', '7-10', '11+'] %}
+              <option value="{{ hours }}" {% if profile.get('study_hours', '4-6') == hours %}selected{% endif %}>{{ hours }} hours</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="entry_year">University entry year</label>
+            <select id="entry_year" name="entry_year">
+              <option value="">Not sure yet</option>
+              {% for year in range(2027, 2037) %}
+              <option value="{{ year }}" {% if profile.get('entry_year', '') == year|string %}selected{% endif %}>{{ year }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-pair">
+          <div>
+            <label for="gpa">Current GPA (optional)</label>
+            <input id="gpa" name="gpa" type="number" inputmode="decimal" step="any" min="0" max="100" placeholder="e.g. 3.7" value="{{ profile.get('gpa', '') }}">
+          </div>
+          <div>
+            <label for="gpa_scale">GPA scale</label>
+            <select id="gpa_scale" name="gpa_scale">
+              <option value="4" {% if profile.get('gpa_scale', '4') == '4' %}selected{% endif %}>Out of 4.0</option>
+              <option value="5" {% if profile.get('gpa_scale') == '5' %}selected{% endif %}>Out of 5.0</option>
+              <option value="100" {% if profile.get('gpa_scale') == '100' %}selected{% endif %}>Out of 100</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="scholarships">Are scholarships important for your plans?</label>
+        <select id="scholarships" name="scholarships">
+          <option value="yes" {% if profile.get('scholarships', true) %}selected{% endif %}>Yes, include funding preparation</option>
+          <option value="no" {% if profile.get('scholarships') == false %}selected{% endif %}>Not a focus right now</option>
+        </select>
+
+        <button type="submit" class="primary">Save and explore my Odyssey <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="fineprint">University names are goals, not verified admissions advice. Use fictional details while testing the site.</p>
+    </section>
+  </main>
+  <footer class="wrap foot">BUILT FOR THE JOURNEY, NOT JUST THE DESTINATION <span>ITHACA / 2026</span></footer>
+  <script>
+    const mode = document.getElementById('mode');
+    const specific = document.getElementById('specific-field');
+    const university = document.getElementById('university');
+    const gpa = document.getElementById('gpa');
+    const gpaScale = document.getElementById('gpa_scale');
+    function updateMode() {
+      const show = mode.value === 'specific';
+      specific.hidden = !show;
+      university.required = show;
+    }
+    function updateGpaScale() {
+      gpa.max = gpaScale.value;
+    }
+    mode.addEventListener('change', updateMode);
+    gpaScale.addEventListener('change', updateGpaScale);
+    updateMode();
+    updateGpaScale();
+  </script>
+</body>
+</html>

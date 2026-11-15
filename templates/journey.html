@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Odyssey — Ithaca</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dashboard">
+  <header class="topbar wrap">
+    <a class="brand" href="/" aria-label="Ithaca home"><span class="brand-mark">✦</span> ITHACA<span class="dot">.</span></a>
+    <nav class="assessment-nav"><a href="{{ url_for('assessment') }}">Academic practice</a><a href="{{ url_for('progress') }}">My progress</a><a href="{{ url_for('athena') }}">Athena AI</a><a href="{{ url_for('home') }}">Edit profile ↗</a></nav>
+  </header>
+  <main class="wrap dashboard-main">
+    <div class="eyebrow"><span class="line"></span> THE PERSONAL ODYSSEY</div>
+    <div class="dashboard-heading">
+      <div>
+        <h1>Your journey<br>starts <em>here.</em></h1>
+        <p class="lead compact">Grade {{ profile.grade }} · {{ profile.interest }}</p>
+      </div>
+      <aside class="destination-card">
+        <span class="card-label">YOUR ITHACA</span>
+        <strong>{{ profile.destination }}</strong>
+        <span class="card-caption">{{ 'University goals' if profile.universities else 'Exploring destinations' }} · {{ profile.get('entry_year') or 'Entry year undecided' }}</span>
+      </aside>
+    </div>
+    <div class="route-link-bar"><span>Explore admissions policies, funding options, and your next steps.</span><a href="{{ url_for('requirements') }}">Compare university paths ↗</a></div>
+    <section class="plan-overview" aria-label="Your preparation plan">
+      <div class="plan-cell">
+        <span class="card-label">YOUR UNIVERSITIES</span>
+        {% if profile.universities %}
+        <div class="university-tags">{% for name in profile.universities %}<span class="university-tag">{{ name }}</span>{% endfor %}</div>
+        {% else %}
+        <strong>Exploring my options</strong>
+        {% endif %}
+      </div>
+      <div class="plan-cell">
+        <span class="card-label">WEEKLY STUDY TIME</span>
+        <strong>{{ profile.get('study_hours', 'Not set') }}{% if profile.get('study_hours') %} hours{% endif %}</strong>
+      </div>
+      <div class="plan-cell">
+        <span class="card-label">ACADEMIC RECORD</span>
+        <strong>{% if profile.get('gpa') %}{{ profile.gpa }} / {{ profile.get('gpa_scale', '4') }} GPA{% else %}Not added{% endif %}</strong>
+      </div>
+      <div class="plan-cell">
+        <span class="card-label">SCHOLARSHIP PLANNING</span>
+        <strong>{% if profile.get('scholarships') %}Included{% elif profile.get('scholarships') == false %}Not prioritized{% else %}Not set{% endif %}</strong>
+      </div>
+    </section>
+    <section class="practice-strip" aria-label="Academic practice">
+      <div><span class="panel-index">ACADEMIC PRACTICE</span><strong>Discover your next learning goal.</strong><span id="recent-practice" class="card-caption">Take a short practice check to see your strengths and focus areas.</span></div>
+      <div class="practice-strip-actions"><a href="{{ url_for('assessment') }}">Take a skill check ↗</a><a href="{{ url_for('progress') }}">View progress ↗</a></div>
+    </section>
+    <section class="panel athena-dashboard" aria-label="Athena personalized journey">
+      <div class="athena-dashboard-top">
+        <div><span class="panel-index">ATHENA / YOUR NEXT CHAPTER</span><h2 id="athena-dash-title">Your journey, guided by Athena</h2><p class="hint" id="athena-dash-caption">Build a personalized path from your university goals and practice results.</p></div>
+        <a class="secondary-btn" href="{{ url_for('athena') }}">Open Athena ↗</a>
+      </div>
+      <div class="athena-dash-quests" id="athena-dash-quests" hidden></div>
+      <p class="hint athena-dash-foot" id="athena-dash-foot">A study plan can change as you learn.</p><p class="hint cloud-note" id="storage-status">Saved in this browser</p>
+    </section>
+    <div class="dashboard-layout">
+      <section class="panel voyage-panel">
+        <div class="panel-head"><span class="panel-index">01 / THE FIVE ISLANDS</span><span class="small-glyph">✦</span></div>
+        <h2>Your voyage map</h2>
+        <p class="hint">Five preparation areas to explore. Admission and scholarship requirements vary by university.</p>
+        <div class="islands">
+          {% for island in islands %}
+          <a class="island" href="{{ url_for('assessment') if island.title == 'Exams' else url_for('requirements') + '#' + island.title|lower }}">
+            <div class="island-emblem"><span>{{ island.icon }}</span></div>
+            <div class="island-text"><small>ISLAND {{ island.symbol }}</small><strong>{{ island.title }}</strong><span>{{ island.detail }}</span></div>
+            <div class="island-arrow">↗</div>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      <aside class="right-stack">
+        <section class="panel avatar-panel">
+          <div class="panel-head"><span class="panel-index">02 / YOUR ADVENTURER</span><span class="small-glyph">✺</span></div>
+          <div class="avatar-figure" aria-hidden="true">♜</div>
+          <div class="avatar-caption"><strong id="level-label">Level 1</strong><span id="xp-count">0 XP</span></div>
+          <div class="meter"><div id="level-meter"></div></div>
+          <p class="hint centered">Complete quests to strengthen your character.</p>
+        </section>
+        <section class="panel quest-panel">
+          <div class="panel-head"><span class="panel-index">03 / DAILY QUESTS</span><span class="small-glyph">☷</span></div>
+          <h2>Today's quests</h2>
+          <p class="hint">Build momentum with a few small steps today.</p>
+          <div class="quest-list">
+            {% for quest in quests %}
+            <label class="quest">
+              <input type="checkbox" data-quest-id="{{ quest.id }}" data-xp="{{ quest.xp }}">
+              <span class="quest-info"><strong>{{ quest.title }}</strong><small>{{ quest.detail }}</small></span>
+              <span class="xp-tag">+{{ quest.xp }} XP</span>
+            </label>
+            {% endfor %}
+          </div>
+          <p class="completion-label" id="completion-label">0 of 3 quests complete</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+  <footer class="wrap foot">EVERY GREAT JOURNEY BEGINS WITH ONE STEP <span>ITHACA / 2026</span></footer>
+  <script src="{{ url_for('static', filename='sync.js') }}"></script>
+  <script>
+    window.IthacaSync.ready.then(() => {
+    const profile = {{ profile | tojson }};
+    const storageKey = 'ithaca-quests';
+    const boxes = Array.from(document.querySelectorAll('[data-quest-id]'));
+    let saved = {};
+    try {
+      const current = localStorage.getItem(storageKey);
+      if (current !== null) {
+        saved = JSON.parse(current) || {};
+      } else {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('ithaca-journey:')) {
+            const oldState = JSON.parse(localStorage.getItem(key) || '{}');
+            for (const questId of ['plan', 'focus', 'reflect']) {
+              if (oldState[questId]) saved[questId] = true;
+            }
+          }
+        }
+      }
+    } catch (_) { saved = {}; }
+    boxes.forEach(box => { box.checked = Boolean(saved[box.dataset.questId]); box.disabled = box.checked; });
+    function update() {
+      const state = {};
+      let xp = 0;
+      let completed = 0;
+      boxes.forEach(box => {
+        if(box.checked) box.disabled = true;
+        state[box.dataset.questId] = box.checked;
+        if(box.checked){ completed++; xp += Number(box.dataset.xp || 0); }
+      });
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      window.IthacaSync.save();
+      xp += totalAthenaXp();
+      const level = 1 + Math.floor(xp / 50);
+      const progress = xp % 50;
+      document.getElementById('level-label').textContent = 'Level ' + level;
+      document.getElementById('xp-count').textContent = xp + ' XP';
+      document.getElementById('level-meter').style.width = (progress * 2) + '%';
+      document.getElementById('completion-label').textContent = completed + ' of ' + boxes.length + ' quests complete';
+    }
+    boxes.forEach(box => box.addEventListener('change', update));
+    function totalAthenaXp() {
+      try {
+        const ledger = JSON.parse(localStorage.getItem('ithaca-athena-xp-v1') || '{}');
+        return Object.values(ledger).reduce((sum, count) => sum + Math.max(0, Math.min(3, Number(count) || 0)) * 10, 0);
+      } catch (_) { return 0; }
+    }
+    function renderAthenaQuests() {
+      let saved;
+      try { saved = JSON.parse(localStorage.getItem('ithaca-athena-current-v1') || 'null'); }
+      catch (_) { saved = null; }
+      const signature = JSON.stringify([profile.grade, profile.interest, profile.study_hours, profile.universities || [], profile.entry_year]);
+      if (!saved || saved.signature !== signature || !saved.plan || !Array.isArray(saved.plan.quests)) return;
+      const list = document.getElementById('athena-dash-quests');
+      list.hidden = false;
+      document.getElementById('athena-dash-title').textContent = saved.plan.heading;
+      document.getElementById('athena-dash-caption').textContent = saved.plan.summary;
+      document.getElementById('athena-dash-foot').textContent = 'Complete quests once to earn up to 30 extra XP per day. New plans keep the XP already earned.';
+      list.replaceChildren();
+      saved.plan.quests.forEach((quest, i) => {
+        const label = document.createElement('label');
+        label.className = 'athena-dash-quest';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = (saved.completed || []).includes(i);
+        checkbox.disabled = checkbox.checked;
+        const content = document.createElement('span');
+        content.className = 'athena-dash-quest-info';
+        const title = document.createElement('strong');
+        title.textContent = quest.title;
+        const description = document.createElement('small');
+        description.textContent = quest.island + ' · ' + quest.minutes + ' min · ' + quest.detail;
+        content.append(title, description);
+        label.append(checkbox, content);
+        checkbox.addEventListener('change', () => {
+          const wasChecked = (saved.completed || []).includes(i);
+          saved.completed = (saved.completed || []).filter(n => n !== i);
+          if (checkbox.checked) {
+            checkbox.disabled = true;
+            saved.completed.push(i);
+            if (!wasChecked) {
+              const today = new Date().toLocaleDateString('en-CA');
+              let ledger = {};
+              try { ledger = JSON.parse(localStorage.getItem('ithaca-athena-xp-v1') || '{}'); } catch (_) {}
+              if ((ledger[today] || 0) < 3) {
+                ledger[today] = (ledger[today] || 0) + 1;
+                localStorage.setItem('ithaca-athena-xp-v1', JSON.stringify(ledger));
+              }
+            }
+          }
+          localStorage.setItem('ithaca-athena-current-v1', JSON.stringify(saved));
+          window.IthacaSync.save();
+          update();
+        });
+        list.appendChild(label);
+      });
+    }
+    renderAthenaQuests();
+    update();
+    try {
+      const attempts = JSON.parse(localStorage.getItem('ithaca-assessments-v1') || '[]');
+      if (Array.isArray(attempts) && attempts.length) {
+        const last = attempts[attempts.length - 1];
+        document.getElementById('recent-practice').textContent = 'Latest practice: ' + last.score + ' of ' + last.total + ' correct · ' + attempts.length + ' attempt(s) saved';
+      }
+    } catch (_) {}
+    });
+  </script>
+</body>
+</html>
