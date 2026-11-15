@@ -1,0 +1,10 @@
+/* Upgrade 7 - small scoped additions to existing Ithaca theme */
+.xp-level-detail {text-align:center;margin:10px 0 0;font-size:.85rem;opacity:.86}
+.daily-reset-note {font-size:.78rem;opacity:.77;margin-top:9px}
+.ithaca-xp-summary {margin-top:28px;padding:22px;border:1px solid rgba(107,215,242,.35);border-radius:18px;background:rgba(4,88,152,.22)}
+.ithaca-xp-summary h2{margin:7px 0 16px;font-size:1.55rem}
+.ithaca-xp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.ithaca-xp-stat{border:1px solid rgba(150,231,250,.25);border-radius:12px;padding:16px;background:rgba(6,93,158,.25)}
+.ithaca-xp-stat strong{font-size:1.35rem;display:block;margin-bottom:6px}
+.ithaca-xp-stat span{font-size:.8rem;opacity:.85}
+.ithaca-xp-summary .hint{margin:12px 0 0}

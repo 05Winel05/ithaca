@@ -7,6 +7,7 @@
   <title>My Odyssey — Ithaca</title>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='gamification.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='dashboard_explorer.css') }}">
 </head>
 
@@ -242,9 +243,8 @@
             <div id="level-meter"></div>
           </div>
 
-          <p class="hint centered">
-            Complete quests to strengthen your character.
-          </p>
+          <p id="xp-level-detail" class="xp-level-detail" aria-live="polite">0 / 50 XP to next level</p>
+          <p class="hint centered">Earn XP through daily tasks and Athena quests. Each reward counts once.</p>
 
         </section>
 
@@ -285,6 +285,7 @@
 
           </div>
 
+          <p class="daily-reset-note" id="daily-reset-note"></p>
           <p class="completion-label" id="completion-label">
             0 of 3 quests complete
           </p>
@@ -309,285 +310,7 @@
 
   <script src="{{ url_for('static', filename='sync.js') }}"></script>
 
-  <script>
-    window.IthacaSync.ready.then(() => {
-
-      // Load profile from Flask-rendered JSON
-      const profile = JSON.parse(
-        document.getElementById('ithaca-profile-data').textContent
-      );
-
-      const storageKey = 'ithaca-quests';
-
-      const boxes = Array.from(
-        document.querySelectorAll('[data-quest-id]')
-      );
-
-      let saved = {};
-
-      try {
-        const current = localStorage.getItem(storageKey);
-
-        if (current !== null) {
-          saved = JSON.parse(current) || {};
-        } else {
-          for (let i = 0; i < localStorage.length; i++) {
-
-            const key = localStorage.key(i);
-
-            if (key && key.startsWith('ithaca-journey:')) {
-
-              const oldState = JSON.parse(
-                localStorage.getItem(key) || '{}'
-              );
-
-              for (const questId of ['plan', 'focus', 'reflect']) {
-                if (oldState[questId]) {
-                  saved[questId] = true;
-                }
-              }
-            }
-          }
-        }
-      } catch (_) {
-        saved = {};
-      }
-
-      boxes.forEach(box => {
-        box.checked = Boolean(saved[box.dataset.questId]);
-        box.disabled = box.checked;
-      });
-
-      // Calculate XP and levels
-      function update() {
-
-        const state = {};
-        let xp = 0;
-        let completed = 0;
-
-        boxes.forEach(box => {
-
-          if (box.checked) {
-            box.disabled = true;
-          }
-
-          state[box.dataset.questId] = box.checked;
-
-          if (box.checked) {
-            completed++;
-            xp += Number(box.dataset.xp || 0);
-          }
-
-        });
-
-        localStorage.setItem(
-          storageKey,
-          JSON.stringify(state)
-        );
-
-        window.IthacaSync.save();
-
-        xp += totalAthenaXp();
-
-        const level = 1 + Math.floor(xp / 50);
-        const progress = xp % 50;
-
-        document.getElementById('level-label').textContent =
-          'Level ' + level;
-
-        document.getElementById('xp-count').textContent =
-          xp + ' XP';
-
-        document.getElementById('level-meter').style.width =
-          (progress * 2) + '%';
-
-        document.getElementById('completion-label').textContent =
-          completed + ' of ' + boxes.length + ' quests complete';
-      }
-
-      boxes.forEach(box =>
-        box.addEventListener('change', update)
-      );
-
-      // Calculate Athena quest XP
-      function totalAthenaXp() {
-
-        try {
-          const ledger = JSON.parse(
-            localStorage.getItem('ithaca-athena-xp-v1') || '{}'
-          );
-
-          return Object.values(ledger).reduce(
-            (sum, count) =>
-              sum + Math.max(
-                0,
-                Math.min(3, Number(count) || 0)
-              ) * 10,
-            0
-          );
-
-        } catch (_) {
-          return 0;
-        }
-      }
-
-      // Display Athena personalized quests
-      function renderAthenaQuests() {
-
-        let saved;
-
-        try {
-          saved = JSON.parse(
-            localStorage.getItem('ithaca-athena-current-v1') || 'null'
-          );
-        } catch (_) {
-          saved = null;
-        }
-
-        const signature = JSON.stringify([
-          profile.grade,
-          profile.interest,
-          profile.study_hours,
-          profile.universities || [],
-          profile.entry_year
-        ]);
-
-        if (
-          !saved ||
-          saved.signature !== signature ||
-          !saved.plan ||
-          !Array.isArray(saved.plan.quests)
-        ) {
-          return;
-        }
-
-        const list = document.getElementById(
-          'athena-dash-quests'
-        );
-
-        list.hidden = false;
-
-        document.getElementById('athena-dash-title').textContent =
-          saved.plan.heading;
-
-        document.getElementById('athena-dash-caption').textContent =
-          saved.plan.summary;
-
-        document.getElementById('athena-dash-foot').textContent =
-          'Complete quests once to earn up to 30 extra XP per day. New plans keep the XP already earned.';
-
-        list.replaceChildren();
-
-        saved.plan.quests.forEach((quest, i) => {
-
-          const label = document.createElement('label');
-          label.className = 'athena-dash-quest';
-
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-
-          checkbox.checked =
-            (saved.completed || []).includes(i);
-
-          checkbox.disabled = checkbox.checked;
-
-          const content = document.createElement('span');
-          content.className = 'athena-dash-quest-info';
-
-          const title = document.createElement('strong');
-          title.textContent = quest.title;
-
-          const description = document.createElement('small');
-
-          description.textContent =
-            quest.island + ' · ' +
-            quest.minutes + ' min · ' +
-            quest.detail;
-
-          content.append(title, description);
-          label.append(checkbox, content);
-
-          checkbox.addEventListener('change', () => {
-
-            const wasChecked =
-              (saved.completed || []).includes(i);
-
-            saved.completed =
-              (saved.completed || []).filter(n => n !== i);
-
-            if (checkbox.checked) {
-
-              checkbox.disabled = true;
-              saved.completed.push(i);
-
-              if (!wasChecked) {
-
-                const today =
-                  new Date().toLocaleDateString('en-CA');
-
-                let ledger = {};
-
-                try {
-                  ledger = JSON.parse(
-                    localStorage.getItem('ithaca-athena-xp-v1') || '{}'
-                  );
-                } catch (_) {}
-
-                if ((ledger[today] || 0) < 3) {
-
-                  ledger[today] =
-                    (ledger[today] || 0) + 1;
-
-                  localStorage.setItem(
-                    'ithaca-athena-xp-v1',
-                    JSON.stringify(ledger)
-                  );
-                }
-              }
-            }
-
-            localStorage.setItem(
-              'ithaca-athena-current-v1',
-              JSON.stringify(saved)
-            );
-
-            window.IthacaSync.save();
-
-            update();
-          });
-
-          list.appendChild(label);
-        });
-      }
-
-      renderAthenaQuests();
-      update();
-
-      // Display latest academic practice result
-      try {
-
-        const attempts = JSON.parse(
-          localStorage.getItem('ithaca-assessments-v1') || '[]'
-        );
-
-        if (Array.isArray(attempts) && attempts.length) {
-
-          const last = attempts[attempts.length - 1];
-
-          document.getElementById('recent-practice').textContent =
-            'Latest practice: ' +
-            last.score +
-            ' of ' +
-            last.total +
-            ' correct · ' +
-            attempts.length +
-            ' attempt(s) saved';
-        }
-
-      } catch (_) {}
-
-    });
-  </script>
+  <script src="{{ url_for('static', filename='gamification.js') }}" defer></script>
 
 </body>
 </html>

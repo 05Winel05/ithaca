@@ -1,3 +1,4 @@
+import re
 """Ithaca web application: college journey planning and daily quests."""
 import os
 from datetime import timedelta, datetime, timezone
@@ -76,7 +77,7 @@ def sync_progress():
             return jsonify({"error": "Too many progress sections."}), 400
         allowed = {
             "ithaca-quests", "ithaca-assessments-v1", "ithaca-exam-practice-v1",
-            "ithaca-athena-current-v1", "ithaca-athena-xp-v1",
+            "ithaca-athena-current-v1", "ithaca-athena-xp-v1", "ithaca-xp-ledger-v1",
         }
         state = {key: value for key, value in supplied.items()
                  if key in allowed or (key.startswith("ithaca-preparation:") and len(key) <= 220)}
@@ -106,6 +107,21 @@ def sync_progress():
                 sanitized.append({"date": date, "exam": exam, "score": score,
                                   "total": total, "topics": clean_topics})
             state["ithaca-exam-practice-v1"] = sanitized
+        # ITHACA_UPGRADE7: bounded idempotent XP event ledger.
+        if "ithaca-xp-ledger-v1" in state:
+            raw = state["ithaca-xp-ledger-v1"]
+            if not isinstance(raw, dict) or raw.get("version") != 1 or not isinstance(raw.get("events"), dict) or len(raw["events"]) > 480:
+                return jsonify({"error": "Invalid XP history."}), 400
+            events = {}
+            for event_id, event in raw["events"].items():
+                if (not isinstance(event_id, str) or not 1 <= len(event_id) <= 160 or not isinstance(event, dict)
+                        or type(event.get("xp")) is not int or not 0 <= event["xp"] <= 40
+                        or not isinstance(event.get("day"), str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", event["day"])
+                        or not isinstance(event.get("type"), str) or len(event["type"]) > 24
+                        or not isinstance(event.get("title"), str) or len(event["title"]) > 100):
+                    return jsonify({"error": "Invalid XP reward entry."}), 400
+                events[event_id] = {"xp": event["xp"], "day": event["day"], "type": event["type"], "title": event["title"]}
+            state["ithaca-xp-ledger-v1"] = {"version": 1, "events": events}
         collection.update_one(
             {"_id": owner_id},
             {"$set": {"state": state, "updated_at": datetime.now(timezone.utc)}},

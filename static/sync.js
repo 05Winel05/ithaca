@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const commonKeys = [
-    'ithaca-quests', 'ithaca-assessments-v1', 'ithaca-exam-practice-v1',
+    'ithaca-quests', 'ithaca-assessments-v1', 'ithaca-exam-practice-v1', 'ithaca-xp-ledger-v1',
     'ithaca-athena-current-v1', 'ithaca-athena-xp-v1'
   ];
   let connected = false;
@@ -59,6 +59,10 @@
           unique.set(identity, attempt);
         }
         all[key] = [...unique.values()].sort((x,y) => x.date.localeCompare(y.date)).slice(-40);
+      } else if (key === 'ithaca-xp-ledger-v1') {
+        // Immutable rewards: merge unique event ids. Never add XP twice for the same id.
+        const events = {...(b?.events || {}), ...(a?.events || {})};
+        all[key] = {version:1, events:Object.fromEntries(Object.entries(events).slice(-480))};
       } else if (key === 'ithaca-athena-xp-v1') {
         const ledger = {};
         for (const day of new Set([...Object.keys(a || {}), ...Object.keys(b || {})])) {

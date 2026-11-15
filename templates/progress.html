@@ -6,6 +6,7 @@
   <title>Academic progress — Ithaca</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='unified_progress.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='gamification.css') }}">
 </head>
 <body>
   <header class="topbar wrap">
@@ -59,6 +60,19 @@
         </div>
       </div>
     </section>
+    <!-- ITHACA_UPGRADE7: gamification view, read-only summary -->
+    <section class="ithaca-xp-summary" aria-label="Game level and XP">
+      <span class="panel-index">04 / YOUR ADVENTURER</span>
+      <h2>Level and quest progress</h2>
+      <div class="ithaca-xp-stats">
+        <div class="ithaca-xp-stat"><strong id="gamification-level">Level 1</strong><span>Current level</span></div>
+        <div class="ithaca-xp-stat"><strong id="gamification-xp">0 XP earned</strong><span>Lifetime quest experience</span></div>
+        <div class="ithaca-xp-stat"><strong id="gamification-today">0 XP earned today</strong><span>Today's activity</span></div>
+        <div class="ithaca-xp-stat"><strong id="gamification-streak">0 days active</strong><span>Consecutive activity days</span></div>
+      </div>
+      <p class="hint">Quest XP rewards are awarded once. Daily quests refresh by local date. Practice scores are tracked separately and do not automatically grant XP.</p>
+      <p><a href="/journey" class="secondary-btn">Complete daily and Athena quests ↗</a></p>
+    </section>
     <div class="progress-actions">
       <a class="primary wide-action" id="practice-next" href="{{ url_for('assessment', form='A') }}">Start practice set A ↗</a>
       <a class="secondary-btn back-action" href="{{ url_for('journey') }}">Back to the voyage map</a>
@@ -68,6 +82,7 @@
   <footer class="wrap foot">LEARN · PRACTICE · REFLECT · IMPROVE <span>ITHACA / 2026</span></footer>
   <script src="{{ url_for('static', filename='sync.js') }}"></script>
   <script src="{{ url_for('static', filename='unified_progress.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='gamification.js') }}" defer></script>
   <script>
     window.IthacaSync.ready.then(() => {
     const historyKey = 'ithaca-assessments-v1';
