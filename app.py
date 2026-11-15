@@ -299,6 +299,9 @@ app.register_blueprint(explorer_bp)
 from university_profiles import profiles_bp
 app.register_blueprint(profiles_bp)
 
+from exam_practice import exam_practice_bp
+app.register_blueprint(exam_practice_bp)
+
 if __name__ == "__main__":
     # Local development only; disable debug mode before deployment.
     app.run(debug=True)
