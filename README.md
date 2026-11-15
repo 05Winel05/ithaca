@@ -1,121 +1,535 @@
+
 # Ithaca — Your Journey to Your Dream University
 
-Ithaca is a Flask web application for students organizing their college preparation. Students can set academic goals, choose universities, follow five preparation areas, and complete daily quests that earn XP.
+Ithaca is a Flask web application designed to help high school students organize their journey toward university admission.
 
-## Running on Windows
+Students can set academic goals, explore university preparation requirements, complete academic practice questions, track progress, and earn XP through daily quests.
 
-1. Open the `ithaca` folder in Visual Studio Code.
-2. Open **Terminal → New Terminal**.
-3. Create an environment if necessary: `py -m venv .venv`.
-4. Install dependencies: `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`.
-5. Start the application: `.\.venv\Scripts\python.exe app.py`.
-6. Visit `http://127.0.0.1:5000` in a browser.
-7. Press **Ctrl+C** in the terminal to stop the application.
+Ithaca also includes Athena, a Gemini-powered AI study planning assistant, and optional MongoDB Atlas synchronization to save learning progress.
 
 ## Features
 
-- Choose Grades 9–12 and a general preparation route or up to three university goals.
-- Set an academic interest, weekly study time, optional GPA, intended entry year, and scholarship priority.
-- Edit the student profile without rebuilding the journey.
-- Explore academics, exams, achievements, applications, and scholarships as separate preparation areas.
-- Complete daily quests to earn XP and level up.
-- Keep quest progress in browser local storage. Progress from the original single-university format is carried over when available.
+### 1. Personalized University Journey
 
-## Development notes
+- Choose your current grade from Grades 9–12.
+- Select a general preparation route or up to three university goals.
+- Set academic interests and weekly study time.
+- Enter optional GPA, intended university entry year, and scholarship priority.
+- Edit your profile without rebuilding your journey.
+- Explore preparation areas through an interactive journey.
 
-- University names are user-entered destinations. There is no live admissions verification or automatic requirements comparison yet.
-- XP rewards task completion; it does not measure academic performance or admission chances.
-- Profile details are stored in Flask's browser session cookie. Quest completion is stored in the same browser's local storage. This is suitable for local testing only, not for real student accounts or sensitive data.
-- This app has no authentication or production security configuration. It should not be used with real minors' personal data or deployed publicly without appropriate privacy and security controls.
-- The built-in Flask server and fallback secret key are only for local development. Configure a secure secret and disable debugging before deployment.
+### 2. Five Preparation Areas
 
-## Credits and disclosures
+Ithaca organizes university preparation into five areas:
 
-The initial application scaffolding and code suggestions were developed with assistance from ChatGPT. Additional libraries, assets, or reused code should be attributed according to their licenses. Disclose AI assistance and third-party components in the hackathon submission according to organizer requirements.
+1. Academics
+2. Exams
+3. Achievements
+4. Applications
+5. Scholarships
 
-## University planning
+Students can explore each area and complete preparation activities.
 
-Open **Compare university paths** from the journey dashboard, or select any of the five islands.
-The comparison includes official admissions/financial-aid links for Stanford, MIT, and Rice, plus a preparation checklist. Students can switch between international and U.S. domestic financial-aid summaries. The preparation checklist saves separately in browser local storage and does not add XP. Universities outside the reference catalog are explicitly marked as needing research; the site does not invent their requirements.
+### 3. University Planning and Comparison
 
-The reference information was reviewed on November 14, 2026. Published policies may change. Deadlines and eligibility must be reconfirmed for the student's actual admission year and individual circumstances. The site does not calculate admission probabilities or determine eligibility. Selected universities are currently a planning aid; fully automated source retrieval is not implemented.
+The university planning feature includes:
 
-Official sources referenced:
+- University preparation checklists.
+- Official admission and financial aid links.
+- Reference information for Stanford, MIT, and Rice University.
+- International and U.S. domestic financial aid summaries.
+- Guidance for researching universities outside the reference catalog.
 
-- Stanford first-year admission: https://admission.stanford.edu/apply/first-year/
-- Stanford undergraduate aid: https://financialaid.stanford.edu/undergrad/apply/index.html
-- MIT first-year admission: https://mitadmissions.org/apply/firstyear/deadlines-requirements/
-- MIT undergraduate aid: https://sfs.mit.edu/undergraduate-students/apply-for-aid/deadlines-process/
-- Rice international first-year admission: https://admission.rice.edu/apply/first-year-international-applicants
-- Rice domestic first-year admission: https://admission.rice.edu/apply/first-year-domestic-applicants
-- Rice international aid: https://financialaid.rice.edu/apply-aid/international-students
-- Rice financial aid: https://financialaid.rice.edu/
+Students can open **Compare university paths** from the journey dashboard or select one of the five islands.
 
-## Academic practice and progress
+University information is provided as a planning reference. Ithaca does not automatically verify admission eligibility or calculate admission probabilities.
 
-The **Exams** island now opens an eight-question skills check. Practice sets A and B each cover numbers and proportions, algebra and functions, reading comprehension, and evidence-based reasoning. The questions are original to Ithaca; they are not official SAT, ACT, IELTS, or TOEFL items.
+### 4. Academic Practice
 
-After submitting a full set, students see their score, topic breakdown, correct answers, explanations, and suggested study areas. Results are saved in the browser's local storage, which also powers **My progress** and the journey dashboard's latest-practice summary. Scores are separate from quest XP.
+The Exams area includes an eight-question academic skills check.
 
-Use the same browser and address (`http://127.0.0.1:5000`) to retain the existing quest completions, preparation checklist, and practice history. Clearing site data or switching browsers will erase local progress. There is no account synchronization or database in this version.
+Practice sets A and B cover:
 
-The two practice sets cover the same topic categories but have not been statistically equated for difficulty. Results are formative feedback, not standardized scores, validated proficiency measurements, admissions predictions, or evidence of scholarship eligibility.
+- Numbers and proportions
+- Algebra and functions
+- Reading comprehension
+- Evidence-based reasoning
 
-To test: create a student profile; open **Academic practice**; complete all eight questions in set A; submit; review explanations; visit **My progress**; then complete set B and confirm both attempts appear after refreshing. The `/api/assessment/grade` route checks answers on the server. A local development server is sufficient for testing but should not be publicly deployed with debug enabled.
+After completing a practice set, students can view:
 
-## Athena — Gemini-powered planning
+- Total score
+- Performance by topic
+- Correct answers
+- Answer explanations
+- Suggested study areas
 
-Use **Open Athena** on the dashboard, or navigate to `http://127.0.0.1:5000/athena`.
+Results are saved locally in the browser and can optionally be backed up through MongoDB Atlas.
 
-1. Create a Gemini API key at https://aistudio.google.com/apikey.
-2. In the same folder as `app.py`, make an `.env` file from `.env.example` using PowerShell: `Copy-Item .env.example .env`.
-3. Open `.env` in VS Code and replace `PASTE_YOUR_API_KEY_HERE` with the real key. Do not add quotes or spaces around the equals sign. The model is configurable with `GEMINI_MODEL` (default `gemini-3.5-flash-lite`).
-4. Install new dependencies in your existing virtual environment: `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`.
-5. Restart Flask: `.\.venv\Scripts\python.exe app.py`.
-6. Open Athena, choose a situation, check the data-sharing consent box, and click **Build my journey**. You need an internet connection and a valid Gemini API key. Provider usage may incur cost or rate limits.
-7. Use **Poseidon's Storm — I missed a week** to generate an adjusted plan. After generating, open the dashboard to complete the personalized quests.
+The My Progress page displays previous assessment attempts and learning history.
 
-Never paste the API key into ChatGPT, commit it to GitHub, or place it in HTML/JavaScript. `.env` is ignored by Git. If you accidentally publish a key, revoke it in Google AI Studio and create another.
+These questions are original to Ithaca and are not official SAT, ACT, IELTS, TOEFL, or Duolingo English Test questions.
 
-### How Athena works
+Practice scores are intended for learning feedback, not standardized proficiency measurement or admission predictions.
 
-The Flask backend requests an AI-generated study plan using Google's `google-genai` Python SDK. The request includes the selected universities, grade, study time, academic interest, funding priority, and **the latest topic-level results of the short practice check** if available. It does not send question responses, names, email addresses, or an entire assessment history. The user must choose to send that context before each request.
+### 5. Athena — Gemini-Powered AI Planning
 
-Athena returns university preparation milestones and four concrete quests. The selected plan is saved in this browser's `localStorage`; new plans replace the old active plan. Completed personalized quests can earn 10 XP each, capped at 30 AI quest XP per day across plan changes. Previous standard quest XP and practice history are retained. The score is a motivational game mechanic, not evidence of verified learning or admission readiness.
+Athena is an AI-powered academic planning assistant that uses Google's Gemini API.
 
-Plans are *suggestions*, not verified university regulations. The Gemini API does not browse or independently verify current official admissions policies in this version. The app does not generate admission probabilities, claim scholarship eligibility, or treat original practice questions as official examinations. Review official admissions and aid links separately before using any university-specific advice.
+Students can open Athena from the dashboard or visit:
 
-This version still uses a local browser session and local storage, without accounts, server persistence, permission controls, or protections appropriate for real minors' records. **Only use fictional/non-sensitive student details.** For a public deployment, provide actual account security, privacy controls, secure secret management, HTTPS, rate limiting and database access controls.
+http://127.0.0.1:5000/athena
 
-## MongoDB Atlas — saved progress
+Athena uses selected student information to generate personalized preparation plans.
 
-This local version optionally backs up the browser's learning history to MongoDB Atlas. It continues to work when MongoDB is not configured or temporarily unavailable.
+Features include:
 
-### Connect Atlas
+- AI-generated study milestones
+- Personalized academic recommendations
+- Four actionable study quests
+- Planning based on selected universities and goals
+- Consideration of recent academic practice performance
+- Plan adjustment through Poseidon's Storm
 
-1. Create an Atlas account at https://www.mongodb.com/cloud/atlas/register and create a free cluster if one is available to your account and region.
-2. In **Database Access**, create a **database user** with a strong password. This is different from your Atlas login. For local development, grant the user read/write access to the project's database only where the console supports it.
-3. In **Network Access**, choose **Add Current IP Address**. Avoid granting public access to all IP addresses.
-4. On your cluster, select **Connect** → **Drivers** → **Python** to copy the connection string.
-5. In the existing `.env` next to `app.py`, add:
+**Poseidon's Storm — I missed a week**
 
-   ```dotenv
-   MONGODB_URI=mongodb+srv://YOUR_DATABASE_USER:YOUR_DATABASE_PASSWORD@YOUR-CLUSTER.mongodb.net/?retryWrites=true&w=majority
-   MONGODB_DB=ithaca
-   ```
+This feature helps students adjust their preparation plan after falling behind.
 
-   Keep your existing `GEMINI_API_KEY` and `GEMINI_MODEL` lines. **Do not replace the whole `.env` file or share it.** Replace the URI with the precise connection string Atlas supplies. If your password contains reserved URL characters (such as `@`, `:`, `/`, `#`, `%`), URL-encode it or create a strong password without those characters for this local setup.
-6. Run `python -m pip install -r requirements.txt` inside your project's environment. Run `python database_status.py` to test Atlas connectivity and database write/read/delete access.
-7. Restart Flask, open the site at `http://127.0.0.1:5000`, and visit **My Odyssey**. The storage status will show when both browser and Atlas saves are active.
-8. Complete a quest or practice set, then open Atlas **Browse Collections** / **Data Explorer** and view the `ithaca` database. The `profiles` and `progress` collections are created automatically by the first writes. The `progress` collection contains a `state` object with assessment history, quest completion, and latest Athena plan. Database names and navigation may differ slightly depending on the Atlas UI version.
+Athena requests user consent before sending selected planning information to Gemini.
 
-### Data handling and limitations
+Generated recommendations are suggestions, not verified university policies.
 
-- Browser storage remains the working copy so the app is usable offline or if Atlas is unreachable. When the page loads and Atlas is connected, existing local entries are merged with the cloud backup and uploaded. In particular, saved assessment attempts and XP are preserved; a completed quest stays complete, even after refreshing.
-- A completed quest is locked to avoid repeated XP awards. The old **Reset quests** button was removed. Atlas saves the latest state, including changes to the active Athena plan.
-- This is an **individual, local demonstration** without a login or production account security. The database records are linked to a random identifier in a signed Flask browser session. This is **not** suitable for deployment with real minors' records, personally identifying student details, or sensitive financial information. Use fictional test profiles only.
-- Server credentials remain in `.env`. MongoDB connection details must never be placed in browser scripts, screenshots, GitHub, or shared with other participants.
-- If Atlas is not configured, the application still runs with browser-only storage. If Atlas becomes unavailable, browser progress is retained, but cloud backup will resume after the next successful page load. Use the same browser and local URL to preserve the existing profile and records.
-- The generated plans are study suggestions, not authoritative admissions rules. Official admission and scholarship policies still need independent verification.
+### 6. Gamification and XP
 
-The project uses PyMongo, MongoDB's Python driver. Official resources: https://www.mongodb.com/docs/atlas/driver-connection/ and https://www.mongodb.com/docs/languages/python/pymongo-driver/current/get-started/.
+Ithaca uses a quest and XP system to encourage students to stay consistent.
+
+Features include:
+
+- Daily quests
+- XP rewards for completing quests
+- Student levels
+- Personalized Athena quests
+- Progress tracking
+- Completed quest history
+
+Personalized Athena quests award 10 XP each, with a maximum of 30 AI quest XP per day.
+
+The same completed quest cannot repeatedly award XP.
+
+XP is a motivational feature and does not represent academic proficiency or university admission readiness.
+
+### 7. Progress Tracking
+
+The My Progress area helps students monitor their activities.
+
+It includes:
+
+- Completed quests
+- XP and level progress
+- Academic practice history
+- Recent practice performance
+- Personalized Athena plan progress
+
+The browser uses local storage to preserve learning history.
+
+When MongoDB Atlas is configured, the application can additionally synchronize and back up supported progress information.
+
+There is no full user account authentication system in this version.
+
+### 8. MongoDB Atlas Synchronization
+
+Ithaca supports optional MongoDB Atlas integration.
+
+The application uses MongoDB to back up learning progress while keeping the browser as the working copy.
+
+Features include:
+
+- Optional cloud progress backup
+- Synchronization of supported quest and assessment data
+- Preservation of completed quests
+- Saved practice attempts
+- Saved Athena plan state
+- Browser-only operation when MongoDB is unavailable
+
+MongoDB uses two collections:
+
+- `profiles`
+- `progress`
+
+The `progress` collection stores a state object containing supported learning history.
+
+Database integration is designed for local demonstration rather than production student accounts.
+
+## Technology Stack
+
+**Backend**
+- Python
+- Flask
+
+**Frontend**
+- HTML
+- CSS
+- JavaScript
+
+**Artificial Intelligence**
+- Google Gemini API
+- Google GenAI Python SDK
+
+**Database**
+- MongoDB Atlas
+- PyMongo
+
+**Other Technologies**
+- Browser localStorage
+- Flask sessions
+- Git
+- GitHub
+
+## Project Structure
+
+```text
+ithaca/
+├── app.py
+├── assessment_data.py
+├── athena.py
+├── database.py
+├── database_status.py
+├── university_data.py
+├── requirements.txt
+├── README.md
+├── QUICK_START.md
+├── .env.example
+├── .gitignore
+├── static/
+│   ├── style.css
+│   └── sync.js
+└── templates/
+    ├── index.html
+    ├── journey.html
+    ├── requirements.html
+    ├── assessment.html
+    ├── progress.html
+    └── athena.html
+```
+
+## Running on Windows
+
+### Step 1 — Clone the Repository
+
+```powershell
+git clone https://github.com/05Winel05/ithaca.git
+cd ithaca
+```
+
+Alternatively, open an existing copy of the `ithaca` folder in Visual Studio Code.
+
+### Step 2 — Create a Virtual Environment
+
+```powershell
+py -m venv .venv
+```
+
+### Step 3 — Install Dependencies
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+### Step 4 — Configure Environment Variables
+
+Create a `.env` file using the example:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Open `.env` in VS Code and configure:
+
+```env
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+GEMINI_MODEL=YOUR_MODEL_NAME
+
+MONGODB_URI=YOUR_MONGODB_CONNECTION_STRING
+MONGODB_DB=ithaca
+```
+
+Replace the placeholder values with your actual configuration.
+
+Never share the real `.env` file or commit it to GitHub.
+
+Gemini requires an API key and internet connection. MongoDB Atlas synchronization is optional.
+
+### Step 5 — Start Flask
+
+```powershell
+.\.venv\Scripts\python.exe app.py
+```
+
+### Step 6 — Open the Application
+
+Visit:
+
+http://127.0.0.1:5000
+
+### Step 7 — Stop the Application
+
+Press **Ctrl+C** in the terminal.
+
+## Configuring Gemini AI
+
+1. Visit https://aistudio.google.com/apikey
+2. Create a Gemini API key.
+3. Add the key to your `.env` file.
+4. Configure `GEMINI_MODEL` for a model available to your API key.
+5. Install dependencies and restart Flask.
+6. Open Athena from the application dashboard.
+7. Choose a planning situation.
+8. Review and accept the data-sharing consent.
+9. Click **Build my journey**.
+
+Athena generates a personalized study plan and quests.
+
+The API may have usage limits or associated costs.
+
+### How Athena Works
+
+The Flask backend communicates with Gemini through the Google GenAI Python SDK.
+
+With consent, Athena can send:
+
+- Selected universities
+- Current grade
+- Study time
+- Academic interests
+- Scholarship priority
+- Latest topic-level practice results, when available
+
+The application does not intentionally send names, email addresses, individual question responses, or the complete assessment history to Gemini.
+
+Generated plans are saved in browser local storage and may be included in MongoDB progress backups when enabled.
+
+New plans replace the current active plan.
+
+## Configuring MongoDB Atlas
+
+### Step 1 — Create a MongoDB Account
+
+Visit:
+
+https://www.mongodb.com/cloud/atlas/register
+
+Create an Atlas account and database cluster.
+
+### Step 2 — Create a Database User
+
+Under **Database Access**, create a database user with a strong password.
+
+Use database-specific read/write permissions where supported.
+
+### Step 3 — Configure Network Access
+
+Open **Network Access** and add your current IP address.
+
+Avoid allowing unrestricted access from every IP address.
+
+### Step 4 — Copy the Connection String
+
+Open your cluster and select:
+
+**Connect → Drivers → Python**
+
+Copy the connection string provided by MongoDB Atlas.
+
+### Step 5 — Configure `.env`
+
+Add:
+
+```env
+MONGODB_URI=mongodb+srv://YOUR_DATABASE_USER:YOUR_DATABASE_PASSWORD@YOUR-CLUSTER.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB=ithaca
+```
+
+Replace all placeholders with the appropriate values.
+
+If the password contains reserved URL characters, it must be URL-encoded.
+
+Keep the Gemini configuration in the same `.env` file.
+
+### Step 6 — Test MongoDB
+
+Install the project dependencies if needed:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Run:
+
+```powershell
+python database_status.py
+```
+
+A successful test confirms connectivity and database read, write, and delete access.
+
+### Step 7 — Test Synchronization
+
+1. Start the Flask application.
+2. Open http://127.0.0.1:5000.
+3. Create a fictional student profile.
+4. Complete a quest or academic practice set.
+5. Open My Progress.
+6. Check the storage synchronization status.
+7. Open MongoDB Atlas Data Explorer.
+8. Check the `profiles` and `progress` collections.
+9. Refresh the application and confirm progress is preserved.
+
+The application remains usable with browser storage if MongoDB is not configured or temporarily unavailable.
+
+## Testing the Application
+
+### Student Journey
+
+1. Open Ithaca.
+2. Select a grade.
+3. Choose university goals.
+4. Enter academic interests and study time.
+5. Create the student journey.
+6. Explore the five preparation areas.
+
+### Academic Practice
+
+1. Open the Exams area.
+2. Start practice set A.
+3. Complete all eight questions.
+4. Submit answers.
+5. Review the score and explanations.
+6. Open My Progress.
+7. Complete practice set B.
+8. Confirm that both attempts are saved.
+
+### Athena AI
+
+1. Open Athena.
+2. Select a planning situation.
+3. Give consent to share selected planning information.
+4. Generate a study plan.
+5. Review personalized milestones.
+6. Complete an AI-generated quest.
+7. Test Poseidon's Storm to adjust the plan.
+
+### MongoDB Synchronization
+
+1. Confirm MongoDB connectivity.
+2. Complete a quest or practice set.
+3. Check the synchronization status.
+4. Verify records in Atlas Data Explorer.
+5. Refresh the application.
+6. Confirm progress remains available.
+
+Use fictional and non-sensitive profile data during testing.
+
+## Data Storage and Privacy
+
+Ithaca uses several storage mechanisms.
+
+**Flask Session**
+
+Stores profile information in a signed browser session cookie.
+
+**Browser Local Storage**
+
+Stores progress such as quests, practice attempts, and current Athena plan information.
+
+**MongoDB Atlas**
+
+Optionally backs up supported application data.
+
+The application currently does not provide full user registration, authentication, or production-grade access controls.
+
+Records are associated with a random identifier in the signed Flask browser session.
+
+This approach is intended only for a local demonstration.
+
+Do not use real minors' personal information, sensitive educational records, or financial details.
+
+## Current Limitations
+
+- University information is not automatically retrieved or verified in real time.
+- University admission probabilities are not calculated.
+- Scholarship eligibility is not automatically determined.
+- Academic practice questions are not official standardized examination questions.
+- Practice sets have not been statistically equated or validated.
+- AI recommendations may contain inaccurate or outdated information.
+- MongoDB synchronization does not provide authenticated multi-user accounts.
+- Browser data can be lost if local storage is cleared.
+- Production-level privacy, security, and account management are not implemented.
+- The built-in Flask development server is not intended for public production deployment.
+
+Before a public deployment, the application would require appropriate authentication, privacy protection, HTTPS, rate limiting, secure secret management, database access controls, and production server configuration.
+
+Debug mode should be disabled in production.
+
+## Official University References
+
+The reference university information was reviewed on November 14, 2026. Policies and deadlines may change.
+
+### Stanford University
+
+First-year admission:
+
+https://admission.stanford.edu/apply/first-year/
+
+Undergraduate financial aid:
+
+https://financialaid.stanford.edu/undergrad/apply/index.html
+
+### Massachusetts Institute of Technology (MIT)
+
+First-year admission:
+
+https://mitadmissions.org/apply/firstyear/deadlines-requirements/
+
+Undergraduate financial aid:
+
+https://sfs.mit.edu/undergraduate-students/apply-for-aid/deadlines-process/
+
+### Rice University
+
+International admission:
+
+https://admission.rice.edu/apply/first-year-international-applicants
+
+Domestic admission:
+
+https://admission.rice.edu/apply/first-year-domestic-applicants
+
+International financial aid:
+
+https://financialaid.rice.edu/apply-aid/international-students
+
+Financial aid:
+
+https://financialaid.rice.edu/
+
+Students should verify all deadlines, admission requirements, and financial aid policies directly through official university websites.
+
+## Credits and Disclosures
+
+Ithaca was developed with assistance from ChatGPT, including application scaffolding and code suggestions.
+
+The project uses Google's Gemini API for AI-powered academic planning and MongoDB Atlas for optional progress backup.
+
+Third-party libraries, assets, and reused code should be credited according to their applicable licenses.
+
+AI assistance and third-party components should also be disclosed in the HackUTA submission according to organizer requirements.
+
+## GitHub Repository
+
+https://github.com/05Winel05/ithaca
+
+## Project Purpose
+
+Ithaca aims to make university preparation more organized, interactive, and motivating.
+
+By combining university planning, academic practice, personalized AI suggestions, daily quests, and progress tracking, the project demonstrates how technology can support students as they prepare for their educational goals.
+
+The current version is a functional local prototype intended for demonstration and further development.
