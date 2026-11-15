@@ -296,6 +296,9 @@ def athena_plan():
 from university_explorer import explorer_bp
 app.register_blueprint(explorer_bp)
 
+from university_profiles import profiles_bp
+app.register_blueprint(profiles_bp)
+
 if __name__ == "__main__":
     # Local development only; disable debug mode before deployment.
     app.run(debug=True)
